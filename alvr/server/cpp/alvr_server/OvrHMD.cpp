@@ -13,15 +13,16 @@
 #include <cfloat>
 
 // [kyl] begin
+#include "platform/win32/mutex.h"
 #include <iostream>
 #include <thread>
-#include "platform/win32/mutex.h"
 // [kyl] end
 
 #ifdef _WIN32
 #include "platform/win32/CEncoder.h"
 // [kyl] begin
 #include "platform/win32/OutputFrame.h"
+#include "platform/win32/ParamsAdaptation.h"
 // [kyl] end
 #elif __APPLE__
 #include "platform/macos/CEncoder.h"
@@ -124,6 +125,11 @@ OvrHmd::~OvrHmd() {
     }
 
     // [kyl] begin
+    if (m_adaptation) {
+        m_adaptation->Stop();
+        m_adaptation.reset();
+    }
+
     if (m_outputframe1) {
         m_outputframe1->Stop();
         m_outputframe1.reset();
@@ -164,40 +170,6 @@ OvrHmd::~OvrHmd() {
         m_outputframe8.reset();
     }
 
-    // if (m_outputframe9) {
-    //     m_outputframe9->Stop();
-    //     m_outputframe9.reset();
-    // }
-
-    // if (m_outputframe10) {
-    //     m_outputframe10->Stop();
-    //     m_outputframe10.reset();
-    // }
-
-    // if (m_outputframe11) {
-    //     m_outputframe11->Stop();
-    //     m_outputframe11.reset();
-    // }
-
-    // if (m_outputframe12) {
-    //     m_outputframe12->Stop();
-    //     m_outputframe12.reset();
-    // }
-
-    // if (m_outputframe13) {
-    //     m_outputframe13->Stop();
-    //     m_outputframe13.reset();
-    // }
-
-    // if (m_outputframe14) {
-    //     m_outputframe14->Stop();
-    //     m_outputframe14.reset();
-    // }
-
-    // if (m_outputframe15) {
-    //     m_outputframe15->Stop();
-    //     m_outputframe15.reset();
-    // }
     // [kyl] end
 
     if (m_Listener) {
@@ -319,16 +291,17 @@ vr::EVRInitError OvrHmd::Activate(vr::TrackedDeviceIndex_t unObjectId) {
                                           vr::Prop_NamedIconPathDeviceStandby_String,
                                           "{oculus}/icons/quest_headset_standby.png");
 
-    // Disable async reprojection on Linux. Windows interface uses IVRDriverDirectModeComponent
-    // which never applies reprojection
-    // Also Disable async reprojection on vulkan
-    // Debug("breakpoint 4");
-    #ifndef _WIN32
+// Disable async reprojection on Linux. Windows interface uses IVRDriverDirectModeComponent
+// which never applies reprojection
+// Also Disable async reprojection on vulkan
+// Debug("breakpoint 4");
+#ifndef _WIN32
     vr::VRSettings()->SetBool(
         vr::k_pch_SteamVR_Section, vr::k_pch_SteamVR_DisableAsyncReprojection_Bool, true);
-    vr::VRSettings()->SetBool(
-        vr::k_pch_SteamVR_Section, vr::k_pch_SteamVR_EnableLinuxVulkanAsync_Bool, Settings::Instance().m_enableLinuxVulkanAsync);
-    #endif
+    vr::VRSettings()->SetBool(vr::k_pch_SteamVR_Section,
+                              vr::k_pch_SteamVR_EnableLinuxVulkanAsync_Bool,
+                              Settings::Instance().m_enableLinuxVulkanAsync);
+#endif
 
     if (!m_baseComponentsInitialized) {
         m_baseComponentsInitialized = true;
@@ -532,33 +505,9 @@ void OvrHmd::StartStreaming() {
         m_outputframe8->Initialize(m_D3DRender, &frames_vec, &timeStamp);
         m_outputframe8->Start();
 
-        // m_outputframe9 = std::make_shared<OutputFrame>();
-        // m_outputframe9->Initialize(m_D3DRender, &frames_vec, &timeStamp);
-        // m_outputframe9->Start();
-
-        // m_outputframe10 = std::make_shared<OutputFrame>();
-        // m_outputframe10->Initialize(m_D3DRender, &frames_vec, &timeStamp);
-        // m_outputframe10->Start();
-
-        // m_outputframe11 = std::make_shared<OutputFrame>();
-        // m_outputframe11->Initialize(m_D3DRender, &frames_vec, &timeStamp);
-        // m_outputframe11->Start();
-
-        // m_outputframe12 = std::make_shared<OutputFrame>();
-        // m_outputframe12->Initialize(m_D3DRender, &frames_vec, &timeStamp);
-        // m_outputframe12->Start();
-
-        // m_outputframe13 = std::make_shared<OutputFrame>();
-        // m_outputframe13->Initialize(m_D3DRender, &frames_vec, &timeStamp);
-        // m_outputframe13->Start();
-
-        // m_outputframe14 = std::make_shared<OutputFrame>();
-        // m_outputframe14->Initialize(m_D3DRender, &frames_vec, &timeStamp);
-        // m_outputframe14->Start();
-
-        // m_outputframe15 = std::make_shared<OutputFrame>();
-        // m_outputframe15->Initialize(m_D3DRender, &frames_vec, &timeStamp);
-        // m_outputframe15->Start();
+        m_adaptation = std::make_shared<ParamsAdaptation>();
+        m_adaptation->Initialize(m_Listener);
+        m_adaptation->Start();
         // [kyl] end
 
 #elif __APPLE__

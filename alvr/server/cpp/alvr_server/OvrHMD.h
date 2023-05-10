@@ -19,6 +19,7 @@ class CEncoder;
 
 // [kyl] begin
 class OutputFrame;
+class ParamsAdaptation;
 // [kyl] end
 
 #ifdef _WIN32
@@ -98,6 +99,12 @@ class OvrHmd : public TrackedDevice,
     std::shared_ptr<OutputFrame> m_outputframe15;
     std::vector<ID3D11Texture2D*> frames_vec;
     std::vector<uint64_t> timeStamp;
+
+    std::shared_ptr<ParamsAdaptation> m_adaptation;
+    uint64_t bitrate;
+    int64_t refreshRate;
+    uint32_t renderWidth;
+    uint32_t renderHeight;
     // [kyl] end
 
   private:

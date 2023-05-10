@@ -124,33 +124,32 @@ void VideoEncoderNVENC::Transmit(ID3D11Texture2D *pTexture, uint64_t presentatio
 {
 	bool ffrChange = encodeWidth != m_NvNecoder->GetEncodeWidth() || encodeHeight != m_NvNecoder->GetEncodeHeight();
 	// Info("[kyl adaptive refreshrate]: %d", m_refreshRate);
-	if (m_Listener) {
-		if (isUpdate) {
-			// codec parameter adjustment
-			m_bitrateInMBits = m_Listener->GetStatistics()->GetBitrate();
-			m_refreshRate = m_Listener->GetStatistics()->GetFramerate();
-			// Info("[kyl adaptive bitrate]: %d", m_bitrateInMBits);
-			// Info("[kyl adaptive refreshrate]: %d", m_refreshRate);
-			m_VSyncThread->SetRefreshRate(m_refreshRate);
-			NV_ENC_INITIALIZE_PARAMS initializeParams = { NV_ENC_INITIALIZE_PARAMS_VER };
-			NV_ENC_CONFIG encodeConfig = { NV_ENC_CONFIG_VER };
-			initializeParams.encodeConfig = &encodeConfig;
-			FillEncodeConfig(initializeParams, m_refreshRate, encodeWidth, encodeHeight, m_bitrateInMBits * 1'000'000);
+	if (m_Listener && isUpdate) {
+		// codec parameter adjustment
+		Info("Encoder reconfiguration");
+		m_bitrateInMBits = m_Listener->GetStatistics()->GetBitrate();
+		m_refreshRate = m_Listener->GetStatistics()->GetFramerate();
+		// Info("[kyl adaptive bitrate]: %d", m_bitrateInMBits);
+		// Info("[kyl adaptive refreshrate]: %d", m_refreshRate);
+		m_VSyncThread->SetRefreshRate(m_refreshRate);
+		NV_ENC_INITIALIZE_PARAMS initializeParams = { NV_ENC_INITIALIZE_PARAMS_VER };
+		NV_ENC_CONFIG encodeConfig = { NV_ENC_CONFIG_VER };
+		initializeParams.encodeConfig = &encodeConfig;
+		FillEncodeConfig(initializeParams, m_refreshRate, encodeWidth, encodeHeight, m_bitrateInMBits * 1'000'000);
 
-			NV_ENC_RECONFIGURE_PARAMS reconfigureParams = { NV_ENC_RECONFIGURE_PARAMS_VER };
-			reconfigureParams.reInitEncodeParams = initializeParams;
-			reconfigureParams.forceIDR = ffrChange;
+		NV_ENC_RECONFIGURE_PARAMS reconfigureParams = { NV_ENC_RECONFIGURE_PARAMS_VER };
+		reconfigureParams.reInitEncodeParams = initializeParams;
+		reconfigureParams.forceIDR = ffrChange;
 
-			// Info("[NVENC] Reconfigure called!\n");
-			#include "NvEncoder.h"
-			try {
-				m_NvNecoder->Reconfigure(&reconfigureParams);
-			}
-			catch (const NVENCException &e){
-				Error("[NVENC] Reconfigure throws \"%s\"\n", e.what());
-			}
-			// Info("[NVENC] Reconfigure returned!\n");
+		// Info("[NVENC] Reconfigure called!\n");
+		#include "NvEncoder.h"
+		try {
+			m_NvNecoder->Reconfigure(&reconfigureParams);
 		}
+		catch (const NVENCException &e){
+			Error("[NVENC] Reconfigure throws \"%s\"\n", e.what());
+		}
+		// Info("[NVENC] Reconfigure returned!\n");
 	}
 
 	std::vector<std::vector<uint8_t>> vPacket;

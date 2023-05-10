@@ -122,8 +122,6 @@ using namespace DirectX;
 			m_presentationTime = presentationTime;
 			m_targetTimestampNs = targetTimestampNs;
 
-			// m_FrameRender->Startup();
-
 			m_FrameRender->RenderFrame(pTexture, bounds, layerCount, recentering, message, debugText, renderWidth, renderHeight);
 			return true;
 		}
@@ -141,29 +139,20 @@ using namespace DirectX;
 				if (m_bExiting)
 					break;
 
-				// if (m_FrameRender->GetTexture())
-				// {
-				// 	m_videoEncoder->Transmit(m_FrameRender->GetTexture().Get(), m_presentationTime, m_targetTimestampNs, m_scheduler.CheckIDRInsertion());
-				// }
-
-				// [SM] begin
-				// uint32_t encodeWidth, encodeHeight;
-				// m_FrameRender->GetEncodingResolution(&encodeWidth, &encodeHeight);
-				// Info("[FFR] encodeWidth = %d, encodeHeight = %d\n", encodeWidth, encodeHeight);
-
 				// [kyl] begin
-				// if (m_Listener->GetStatistics()->CheckUpdate()) {
-				// 	renderWidth = m_Listener->GetStatistics()->GetWidth();
-				// 	renderHeight = m_Listener->GetStatistics()->GetHeight();
-				// 	isUpdate = true;
-				// 	Info("renderWidth: %d", renderWidth);
-				// 	Info("renderHeight: %d", renderHeight);
-				// 	m_FrameRender = std::make_shared<FrameRender>(m_d3dRender, frames_vec_ptr, timeStamp_ptr, qrcodeTex);
-				// 	m_FrameRender->Startup(m_ffrDataNext, renderWidth, renderHeight);
-				// }
-				// else {
-				// 	isUpdate = false;
-				// }
+				if (m_Listener->GetStatistics()->checkUpdateFlag()) {
+					renderWidth = m_Listener->GetStatistics()->GetWidth();
+					renderHeight = m_Listener->GetStatistics()->GetHeight();
+					isUpdate = true;
+					Info("renderWidth: %d", renderWidth);
+					Info("renderHeight: %d", renderHeight);
+					// m_FrameRender = std::make_shared<FrameRender>(m_d3dRender, frames_vec_ptr, timeStamp_ptr, qrcodeTex);
+					m_FrameRender->Startup(m_ffrDataNext, renderWidth, renderHeight);
+					m_Listener->GetStatistics()->resetUpdateFlag();
+				}
+				else {
+					isUpdate = false;
+				}
 				// [kyl] end
 
 				if (m_FrameRender->GetTexture())
@@ -171,24 +160,7 @@ using namespace DirectX;
 					m_videoEncoder->Transmit(m_FrameRender->GetTexture().Get(), m_presentationTime, m_targetTimestampNs, m_scheduler.CheckIDRInsertion(),
 						renderWidth, renderHeight, isUpdate);
 				}
-				
-				// m_lock.lock();
-				// if(memcmp(&m_ffrData, &m_ffrDataNext, sizeof(FFRData))) {
-				// 	FfrReconfigSend(
-				// 		m_targetTimestampNs,
-				// 		m_ffrDataNext.centerSizeX, m_ffrDataNext.centerSizeY,
-				// 		m_ffrDataNext.centerShiftX, m_ffrDataNext.centerShiftY,
-				// 		m_ffrDataNext.edgeRatioX, m_ffrDataNext.edgeRatioY
-				// 	);
-				// 	Info("[jw] edgeRatioX: %f\n", m_ffrDataNext.edgeRatioX);
-				// 	Info("[jw] edgeRatioY: %f\n", m_ffrDataNext.edgeRatioY);
-				// 	m_FrameRender = std::make_shared<FrameRender>(m_d3dRender, frames_vec_ptr, timeStamp_ptr, qrcodeTex);
-				// 	m_FrameRender->Startup(m_ffrDataNext, renderWidth, renderHeight);
-				// 	m_ffrData = m_ffrDataNext;
-				// }
-				// m_lock.unlock();
-				// [SM] end
-
+			
 				m_encodeFinished.Set();
 			}
 		}

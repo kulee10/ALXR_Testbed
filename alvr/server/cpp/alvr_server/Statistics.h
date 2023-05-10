@@ -163,34 +163,38 @@ public:
 	}
 
 	// [kyl] begin
-	bool CheckUpdate() {
-		// bool state_br = CheckBitrateUpdated();
-		// bool state_fr = CheckFramerateUpdated();
-		// return state_br | state_fr;
+	bool checkUpdateFlag() {
+		return updateFlag;	
+	}
 
+	void resetUpdateFlag() {
+		updateFlag = false;
+	}
+
+	bool CheckUpdate() {
 		time_t cur_time = time(NULL);
 		int interval = cur_time - init_time_br;
 
 		if (interval >= 10) {
 			// match latency
-			for (int i = 0; i < 5; i++) {
-				latency_diff = m_totalLatency - latency[i]; 
-				latency_diff = abs(latency_diff);
-				if (latency_diff < min_latency_diff) {
-					min_latency_diff = latency_diff;
-					min_latency_diff_idx = i;
-				}
-			}
+			// for (int i = 0; i < 5; i++) {
+			// 	latency_diff = m_totalLatency - latency[i]; 
+			// 	latency_diff = abs(latency_diff);
+			// 	if (latency_diff < min_latency_diff) {
+			// 		min_latency_diff = latency_diff;
+			// 		min_latency_diff_idx = i;
+			// 	}
+			// }
 
-			// match throughput
-			for (int i = 0; i < 4; i++) {
-				throughput_diff = m_bitsSentInSecondPrev * 1e-6 - throughput[i]; 
-				throughput_diff = abs(throughput_diff);
-				if (throughput_diff < min_throughput_diff) {
-					min_throughput_diff = throughput_diff;
-					min_throughput_diff_idx = i;
-				}
-			}
+			// // match throughput
+			// for (int i = 0; i < 4; i++) {
+			// 	throughput_diff = m_bitsSentInSecondPrev * 1e-6 - throughput[i]; 
+			// 	throughput_diff = abs(throughput_diff);
+			// 	if (throughput_diff < min_throughput_diff) {
+			// 		min_throughput_diff = throughput_diff;
+			// 		min_throughput_diff_idx = i;
+			// 	}
+			// }
 			
 			// match table
 			// for (int i = 0; i < 9000; i++) {
@@ -227,15 +231,17 @@ public:
 			// 	m_renderHeight = 1568;
 			// }
 
-			// reset
+			// update parameters
 			init_time_br = cur_time;
-			min_latency_diff = 10000;
-			min_throughput_diff = 10000;
+			updateFlag = true;
+			// min_latency_diff = 10000;
+			// min_throughput_diff = 10000;
 
 			return true;
 		}
 		return false;
 	}
+
 	// bitrate update algorithm
 	bool CheckBitrateUpdated() {
 		// if (m_enableAdaptiveBitrate) {
@@ -259,49 +265,15 @@ public:
 		// 	}
 		// }
 
-		// time_t cur_time = time(NULL);
-		// int interval = cur_time - init_time_br;
-		// // Info("interval: %d", interval);
-		// if (interval >= 5 && m_bitrate >= 4) {
-		// 	init_time_br = cur_time;
-		// 	m_bitrate -= 2;
-		// 	return true;
-		// }
 		return false;
 	}
 
 	// framerate update algorithm
 	bool CheckFramerateUpdated() {
-		// time_t cur_time = time(NULL);
-		// int interval = cur_time - init_time_fr;
-		// // Info("interval: %d", interval);
-		// if (interval >= 5 && m_refreshRate >= 24) {
-		// 	init_time_fr = cur_time;
-		// 	m_refreshRate -= 12;
-		// 	return true;
-		// }
 		return false;
 	}
 
 	bool CheckResolutionUpdated() {
-		// time_t cur_time = time(NULL);
-		// int interval = cur_time - init_time_re;
-		// if (interval >= 5) {
-		// 	if (m_renderWidth == 2880) {
-		// 		m_renderWidth = 2112;
-		// 		m_renderHeight = 1184;
-		// 	}
-		// 	else if (m_renderWidth == 2112) {
-		// 		m_renderWidth = 1408;
-		// 		m_renderHeight = 768;
-		// 	}
-		// 	else if (m_renderWidth == 1408){
-		// 		m_renderWidth = 2880;
-		// 		m_renderHeight = 1568;
-		// 	}
-		// 	init_time_re = cur_time;
-		// 	return true;
-		// }
 		return false;
 	}
 
@@ -437,6 +409,8 @@ private:
 	int min_throughput_diff_idx = 0;
 	float current_mos = 0;
 	int target_idx = 0;
+
+	bool updateFlag = false;
 	// [kyl] end
 	
 	// Total/Encode/Send/Decode/ClientFPS/Ping
