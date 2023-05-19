@@ -288,6 +288,9 @@ pub unsafe extern "system" fn Java_com_polygraphene_alvr_OvrActivity_onCreateNat
                 client_time: data.clientTime,
                 packets_lost_total: data.packetsLostTotal,
                 packets_lost_in_second: data.packetsLostInSecond,
+                // [kyl throughput]
+                bits_sent_in_second: data.bitsSentInSecond,
+                // [kyl end]
                 average_send_latency: data.averageSendLatency,
                 average_transport_latency: data.averageTransportLatency,
                 average_decode_latency: data.averageDecodeLatency,

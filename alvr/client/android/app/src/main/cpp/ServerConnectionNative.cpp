@@ -135,6 +135,10 @@ void sendTimeSync() {
     timeSync.packetsLostTotal = LatencyCollector::Instance().getPacketsLostTotal();
     timeSync.packetsLostInSecond = LatencyCollector::Instance().getPacketsLostInSecond();
 
+    // [kyl throughput]
+    timeSync.bitsSentInSecond = LatencyCollector::Instance().getBitsSentInSecond();
+    // [kyl end]
+
     timeSync.averageTotalLatency = (uint32_t) LatencyCollector::Instance().getLatency(0);
 
     timeSync.averageSendLatency = (uint32_t) LatencyCollector::Instance().getLatency(3);

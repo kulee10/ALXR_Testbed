@@ -137,6 +137,9 @@ pub struct TimeSyncPacket {
     pub client_time: u64,
     pub packets_lost_total: u64,
     pub packets_lost_in_second: u64,
+    // [kyl throughput]
+    pub bits_sent_in_second: u64,
+    // [kyl end]
     pub average_send_latency: u32,
     pub average_transport_latency: u32,
     pub average_decode_latency: u64,

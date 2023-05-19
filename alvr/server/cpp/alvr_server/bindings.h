@@ -72,6 +72,10 @@ struct TimeSync {
     unsigned long long packetsLostTotal;
     unsigned long long packetsLostInSecond;
 
+    // [kyl throughput]
+    unsigned long long bitsSentInSecond;
+    // [kyl end]
+    
     unsigned int averageTotalLatency;
 
     unsigned int averageSendLatency;

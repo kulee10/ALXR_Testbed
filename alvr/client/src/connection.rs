@@ -658,6 +658,9 @@ async fn connection_pipeline(
                                     sequence: 0,
                                     packetsLostTotal: data.packets_lost_total,
                                     packetsLostInSecond: data.packets_lost_in_second,
+                                    // [kyl throughput]
+                                    bitsSentInSecond: data.bits_sent_in_second,
+                                    // [kyl end]
                                     averageTotalLatency: 0,
                                     averageSendLatency: data.average_send_latency,
                                     averageTransportLatency: data.average_transport_latency,

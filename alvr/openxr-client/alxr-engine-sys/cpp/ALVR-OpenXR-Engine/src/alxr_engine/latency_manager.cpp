@@ -23,6 +23,9 @@ void LatencyManager::OnTimeSyncRecieved(const TimeSync& timeSync)
             sendBuf.clientTime = Current;
             m_callbackCtx.timeSyncSendFn(&sendBuf);
         }
+        // [kyl throughput]
+        LatencyCollector::Instance().countPacket(sizeof(TrackingInfo));
+        // [kyl end]
     }
     if (timeSync.mode == 3)
         LatencyCollector::Instance().received(timeSync.trackingRecvFrameIndex);
@@ -38,6 +41,9 @@ void LatencyManager::OnPreVideoPacketRecieved(const VideoFrame& header)
             0 : ((std::int64_t)header.sentTime - m_rt_state.timeDiff - timeStamp);
         LatencyCollector::Instance().estimatedSent(header.trackingFrameIndex, offset);
         m_rt_state.lastFrameIndex = header.trackingFrameIndex;
+        // [kyl throughput]
+        LatencyCollector::Instance().countPacket(sizeof(VideoFrame) + header.frameByteSize);
+        // [kyl end]
     }
     if (const auto lostCount = ProcessVideoSeq(header))
         LatencyCollector::Instance().packetLoss(lostCount);
@@ -88,6 +94,10 @@ void LatencyManager::SendTimeSync() {
         .packetsLostTotal = LatencyCollector::Instance().getPacketsLostTotal(),
         .packetsLostInSecond = LatencyCollector::Instance().getPacketsLostInSecond(),
 
+        // [kyl throughput]
+        .bitsSentInSecond = LatencyCollector::Instance().getBitsSentInSecond(),
+        // [kyl end]
+
         .averageTotalLatency = (uint32_t)LatencyCollector::Instance().getLatency(0),
 
         .averageSendLatency = (uint32_t)LatencyCollector::Instance().getLatency(3),
@@ -119,6 +129,10 @@ void LatencyManager::SendFrameReRenderTimeSync() {
 
         .packetsLostTotal = LatencyCollector::Instance().getPacketsLostTotal(),
         .packetsLostInSecond = LatencyCollector::Instance().getPacketsLostInSecond(),
+
+        // [kyl throughput]
+        .bitsSentInSecond = LatencyCollector::Instance().getBitsSentInSecond(),
+        // [kyl end]
 
         .averageTotalLatency = 0,
         .averageSendLatency = 0,

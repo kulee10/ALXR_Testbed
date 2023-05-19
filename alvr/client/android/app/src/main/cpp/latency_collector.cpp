@@ -121,6 +121,11 @@ void LatencyCollector::resetAll() {
     m_PacketsLostInSecond = 0;
     m_PacketsLostPrevious = 0;
 
+    // [kyl throughput]
+    m_bitsSentInSecond = 0;
+    m_bitsSentInSecondPrev = 0;
+    // [kyl end]
+
     m_FecFailureTotal = 0;
     m_FecFailureInSecond = 0;
     m_FecFailurePrevious = 0;
@@ -145,6 +150,11 @@ void LatencyCollector::resetSecond(){
     m_PacketsLostPrevious = m_PacketsLostInSecond;
     m_PacketsLostInSecond = 0;
 
+    // [kyl throughput]
+    m_bitsSentInSecondPrev = m_bitsSentInSecond;
+    m_bitsSentInSecond = 0;
+    // [kyl end]
+
     m_FecFailurePrevious = m_FecFailureInSecond;
     m_FecFailureInSecond = 0;
 }
@@ -163,6 +173,14 @@ void LatencyCollector::packetLoss(int64_t lost) {
     m_PacketsLostTotal += lost;
     m_PacketsLostInSecond += lost;
 }
+
+// [kyl throughput]
+void LatencyCollector::countPacket(int64_t bytes) {
+    checkAndResetSecond();
+
+    m_bitsSentInSecond += bytes * 8;
+}
+// [kyl end]
 
 void LatencyCollector::fecFailure() {
     checkAndResetSecond();
@@ -189,6 +207,11 @@ uint64_t LatencyCollector::getPacketsLostTotal() const {
 uint64_t LatencyCollector::getPacketsLostInSecond() const {
     return m_PacketsLostPrevious;
 }
+// [kyl begin]
+uint64_t LatencyCollector::getBitsSentInSecond() const {
+    return m_bitsSentInSecondPrev;
+}
+// [kyl end]
 uint64_t LatencyCollector::getFecFailureTotal() const {
     return m_FecFailureTotal;
 }

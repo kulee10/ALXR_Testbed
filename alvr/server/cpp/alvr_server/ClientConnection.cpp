@@ -220,17 +220,18 @@ void ClientConnection::ProcessTimeSync(TimeSync data) {
 			m_Statistics->Reset();
 		};
 
-		if (captureTriggerValue) {
-			Info("[kyl_instantaneousBitrate]: %.3f", m_Statistics->GetBitsSentInSecond() / 1000. / 1000.0);
-			Info("[kyl_PacketLossRate]: %.2f%", (m_reportedStatistics.packetsLostTotal / m_Statistics->GetPacketsSentTotal()) * 100);
-			Info("[kyl_totalLatency]: %.3f", sendBuf.serverTotalLatency / 1000.0);
-			Info("[kyl_sendLatency]: %.3f", m_reportedStatistics.averageTransportLatency / 1000.0);
-			Info("[kyl_encodeLatency]: %.3f", (double)(m_Statistics->GetEncodeLatencyAverage()) / US_TO_MS);
-			Info("[kyl_decodeLatency]: %.3f", m_reportedStatistics.averageDecodeLatency / 1000.0);
-			Info("[kyl_ping]: %.3f", m_Statistics->Get(5));
-			Info("[kyl_serverFPS]: %.3f", m_Statistics->GetFPS());
+		// if (captureTriggerValue) {
+		Info("[kyl_instantaneousBitrate]: %.3f", m_Statistics->GetBitsSentInSecond() / 1000. / 1000.0);
+		Info("[kyl_throughput]: %.3f", m_reportedStatistics.bitsSentInSecond / 1000. / 1000.0);
+		Info("[kyl_PacketLossRate]: %.2f%", (m_reportedStatistics.packetsLostTotal / m_Statistics->GetPacketsSentTotal()) * 100);
+		Info("[kyl_totalLatency]: %.3f", sendBuf.serverTotalLatency / 1000.0);
+			// Info("[kyl_sendLatency]: %.3f", m_reportedStatistics.averageTransportLatency / 1000.0);
+			// Info("[kyl_encodeLatency]: %.3f", (double)(m_Statistics->GetEncodeLatencyAverage()) / US_TO_MS);
+			// Info("[kyl_decodeLatency]: %.3f", m_reportedStatistics.averageDecodeLatency / 1000.0);
+			// Info("[kyl_ping]: %.3f", m_Statistics->Get(5));
+			// Info("[kyl_serverFPS]: %.3f", m_Statistics->GetFPS());
 			// Info("[kyl_clientFPS]: %.3f", m_Statistics->Get(4));
-		}
+		// }
 
 		// Continously send statistics info for updating graphs
 		// Info("#{ \"id\": \"GraphStatistics\", \"data\": [%llu,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f,%.3f] }#\n",

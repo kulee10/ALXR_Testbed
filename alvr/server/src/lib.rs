@@ -387,6 +387,9 @@ pub unsafe extern "C" fn HmdDriverFactory(
                 client_time: data.clientTime,
                 packets_lost_total: data.packetsLostTotal,
                 packets_lost_in_second: data.packetsLostInSecond,
+                // [kyl throughput]
+                bits_sent_in_second: data.bitsSentInSecond,
+                // [kyl end]
                 average_send_latency: data.averageSendLatency,
                 average_transport_latency: data.averageTransportLatency,
                 average_decode_latency: data.averageDecodeLatency,

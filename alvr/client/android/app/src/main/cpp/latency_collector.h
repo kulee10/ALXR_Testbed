@@ -15,12 +15,19 @@ public:
     uint64_t getLatency(uint32_t i) const;
     uint64_t getPacketsLostTotal() const;
     uint64_t getPacketsLostInSecond() const;
+    // [kyl throughput]
+    uint64_t getBitsSentInSecond() const;
+    // [kyl end]
     uint64_t getFecFailureTotal() const;
     uint64_t getFecFailureInSecond() const;
     float getFramesInSecond() const;
 
     void packetLoss(int64_t lost);
     void fecFailure();
+
+    // [kyl begin]
+    void countPacket(int64_t bytes);
+    // [kyl end]
 
     void setTotalLatency(uint32_t latency);
 
@@ -72,6 +79,11 @@ private:
     uint64_t m_FecFailureTotal = 0;
     uint64_t m_FecFailureInSecond = 0;
     uint64_t m_FecFailurePrevious = 0;
+
+    // [kyl throughput]
+    uint64_t m_bitsSentInSecond = 0;
+	uint64_t m_bitsSentInSecondPrev = 0;
+    // [kyl end]
 
     std::atomic<uint32_t> m_ServerTotalLatency { 0 };
 

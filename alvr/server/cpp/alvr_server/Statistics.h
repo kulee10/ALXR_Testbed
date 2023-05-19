@@ -177,24 +177,24 @@ public:
 
 		if (interval >= 10) {
 			// match latency
-			// for (int i = 0; i < 5; i++) {
-			// 	latency_diff = m_totalLatency - latency[i]; 
-			// 	latency_diff = abs(latency_diff);
-			// 	if (latency_diff < min_latency_diff) {
-			// 		min_latency_diff = latency_diff;
-			// 		min_latency_diff_idx = i;
-			// 	}
-			// }
+			for (int i = 0; i < 5; i++) {
+				latency_diff = m_totalLatency - latency[i]; 
+				latency_diff = abs(latency_diff);
+				if (latency_diff < min_latency_diff) {
+					min_latency_diff = latency_diff;
+					min_latency_diff_idx = i;
+				}
+			}
 
-			// // match throughput
-			// for (int i = 0; i < 4; i++) {
-			// 	throughput_diff = m_bitsSentInSecondPrev * 1e-6 - throughput[i]; 
-			// 	throughput_diff = abs(throughput_diff);
-			// 	if (throughput_diff < min_throughput_diff) {
-			// 		min_throughput_diff = throughput_diff;
-			// 		min_throughput_diff_idx = i;
-			// 	}
-			// }
+			// match throughput
+			for (int i = 0; i < 7; i++) {
+				throughput_diff = m_bitsSentInSecondPrev * 1e-6 - throughput[i]; 
+				throughput_diff = abs(throughput_diff);
+				if (throughput_diff < min_throughput_diff) {
+					min_throughput_diff = throughput_diff;
+					min_throughput_diff_idx = i;
+				}
+			}
 			
 			// match table
 			// for (int i = 0; i < 9000; i++) {
@@ -398,8 +398,8 @@ private:
 	// quality modeling inputs
 	int vr_exp = 0;
 	int gaming_freq = 1;
-	int latency[5] = {66, 96, 124, 187, 203};
-	int throughput[4] = {5, 19, 26, 35};
+	int latency[5] = {77, 149, 219, 384, 583};
+	int throughput[7] = {4, 6, 18, 21, 26, 30, 36};
 	int packetloss[1] = {0};
 	float latency_diff = 0;
 	float min_latency_diff = 10000;
