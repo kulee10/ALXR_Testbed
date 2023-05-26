@@ -33,10 +33,12 @@ public:
 
 	TimeSync m_reportedStatistics;
 	uint64_t m_lastFecFailure = 0;
+	// [kyl fec]
 	static const uint64_t CONTINUOUS_FEC_FAILURE = 60 * 1000 * 1000;
-	static const int INITIAL_FEC_PERCENTAGE = 5;
-	static const int MAX_FEC_PERCENTAGE = 10;
+	static const int INITIAL_FEC_PERCENTAGE = 1;
+	static const int MAX_FEC_PERCENTAGE = 1;
 	int m_fecPercentage = INITIAL_FEC_PERCENTAGE;
+	// [kyl end]
 
 	uint64_t mVideoFrameIndex = 1;
 

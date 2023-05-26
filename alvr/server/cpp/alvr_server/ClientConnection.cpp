@@ -216,15 +216,21 @@ void ClientConnection::ProcessTimeSync(TimeSync data) {
 			// 	(int)(m_Statistics->m_leftControllerBattery * 100),
 			// 	(int)(m_Statistics->m_rightControllerBattery * 100));
 
+			Info("[kyl_instantaneousBitrate]: %.3f", m_Statistics->GetBitsSentInSecond() / 1000. / 1000.0);
+			m_Statistics->updateThroughput(m_reportedStatistics.bitsSentInSecond / 1000. / 1000.0);
+			Info("[kyl_throughput]: %.3f", m_reportedStatistics.bitsSentInSecond / 1000. / 1000.0);
+			Info("[kyl_PacketLossRate]: %.2f%", (m_reportedStatistics.packetsLostTotal / m_Statistics->GetPacketsSentTotal()) * 100);
+			Info("[kyl_totalLatency]: %.3f", sendBuf.serverTotalLatency / 1000.0);
+
 			m_LastStatisticsUpdate = now;
 			m_Statistics->Reset();
 		};
 
 		// if (captureTriggerValue) {
-		Info("[kyl_instantaneousBitrate]: %.3f", m_Statistics->GetBitsSentInSecond() / 1000. / 1000.0);
-		Info("[kyl_throughput]: %.3f", m_reportedStatistics.bitsSentInSecond / 1000. / 1000.0);
-		Info("[kyl_PacketLossRate]: %.2f%", (m_reportedStatistics.packetsLostTotal / m_Statistics->GetPacketsSentTotal()) * 100);
-		Info("[kyl_totalLatency]: %.3f", sendBuf.serverTotalLatency / 1000.0);
+		// Info("[kyl_instantaneousBitrate]: %.3f", m_Statistics->GetBitsSentInSecond() / 1000. / 1000.0);
+		// Info("[kyl_throughput]: %.3f", m_reportedStatistics.bitsSentInSecond / 1000. / 1000.0);
+		// Info("[kyl_PacketLossRate]: %.2f%", (m_reportedStatistics.packetsLostTotal / m_Statistics->GetPacketsSentTotal()) * 100);
+		// Info("[kyl_totalLatency]: %.3f", sendBuf.serverTotalLatency / 1000.0);
 			// Info("[kyl_sendLatency]: %.3f", m_reportedStatistics.averageTransportLatency / 1000.0);
 			// Info("[kyl_encodeLatency]: %.3f", (double)(m_Statistics->GetEncodeLatencyAverage()) / US_TO_MS);
 			// Info("[kyl_decodeLatency]: %.3f", m_reportedStatistics.averageDecodeLatency / 1000.0);
@@ -266,11 +272,13 @@ float ClientConnection::GetPoseTimeOffset() {
 
 void ClientConnection::OnFecFailure() {
 	Debug("Listener::OnFecFailure()\n");
-	if (GetTimestampUs() - m_lastFecFailure < CONTINUOUS_FEC_FAILURE) {
-		if (m_fecPercentage < MAX_FEC_PERCENTAGE) {
-			m_fecPercentage += 5;
-		}
-	}
+	// [kyl fec]
+	// if (GetTimestampUs() - m_lastFecFailure < CONTINUOUS_FEC_FAILURE) {
+	// 	if (m_fecPercentage < MAX_FEC_PERCENTAGE) {
+	// 		m_fecPercentage += 5;
+	// 	}
+	// }
+	// [kyl end]
 	m_lastFecFailure = GetTimestampUs();
 }
 

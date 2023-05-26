@@ -129,8 +129,8 @@ void VideoEncoderNVENC::Transmit(ID3D11Texture2D *pTexture, uint64_t presentatio
 		Info("Encoder reconfiguration");
 		m_bitrateInMBits = m_Listener->GetStatistics()->GetBitrate();
 		m_refreshRate = m_Listener->GetStatistics()->GetFramerate();
-		// Info("[kyl adaptive bitrate]: %d", m_bitrateInMBits);
-		// Info("[kyl adaptive refreshrate]: %d", m_refreshRate);
+		Info("[kyl adaptive bitrate]: %d", m_bitrateInMBits);
+		Info("[kyl adaptive refreshrate]: %d", m_refreshRate);
 		m_VSyncThread->SetRefreshRate(m_refreshRate);
 		NV_ENC_INITIALIZE_PARAMS initializeParams = { NV_ENC_INITIALIZE_PARAMS_VER };
 		NV_ENC_CONFIG encodeConfig = { NV_ENC_CONFIG_VER };

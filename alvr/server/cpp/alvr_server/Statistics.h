@@ -24,15 +24,13 @@ public:
 
 		// [kyl] begin
 		init_time_br = time(NULL);
-		init_time_fr = time(NULL);
-		init_time_re = time(NULL);
-		// readcsv();
+		readcsv();
 		// [kyl] end
 	}
 
 	// [kyl] begin
 	void readcsv() {
-		std::fstream file("D:/kyl/lookupTable.csv", std::ios::in);
+		std::fstream file("D:/kyl/QoE_Modeling/lookupTable_interpolate.csv", std::ios::in);
 		bool first = true;
 		if (file.is_open()) {
 			while (getline(file, line)) {
@@ -171,14 +169,19 @@ public:
 		updateFlag = false;
 	}
 
+	void updateThroughput(uint64_t throughput) {
+		m_throughput = throughput;
+	}
+
 	bool CheckUpdate() {
 		time_t cur_time = time(NULL);
 		int interval = cur_time - init_time_br;
 
-		if (interval >= 10) {
+		// reconfiguration periodically (10s)
+		if (interval >= 5) {
 			// match latency
 			for (int i = 0; i < 5; i++) {
-				latency_diff = m_totalLatency - latency[i]; 
+				latency_diff = m_totalLatency - latency[i];
 				latency_diff = abs(latency_diff);
 				if (latency_diff < min_latency_diff) {
 					min_latency_diff = latency_diff;
@@ -188,7 +191,7 @@ public:
 
 			// match throughput
 			for (int i = 0; i < 7; i++) {
-				throughput_diff = m_bitsSentInSecondPrev * 1e-6 - throughput[i]; 
+				throughput_diff = m_throughput - throughput[i]; 
 				throughput_diff = abs(throughput_diff);
 				if (throughput_diff < min_throughput_diff) {
 					min_throughput_diff = throughput_diff;
@@ -197,45 +200,32 @@ public:
 			}
 			
 			// match table
-			// for (int i = 0; i < 9000; i++) {
-			// 	if (table[i][3] == latency[min_latency_diff_idx] && table[i][4] == throughput[min_throughput_diff_idx]) {
-			// 		if (table[i][8] > current_mos) {
-			// 			current_mos = table[i][8];
-			// 			target_idx = i;
-			// 		}
-			// 	}
-			// }
-			// Info("target idx: %d", target_idx);
-			// Info("current_mos: %f", current_mos);
-			// update parameter
-			// m_bitrate = table[target_idx][0];
-			// m_refreshRate = table[target_idx][1];
-			// if (table[target_idx][2] == 1) {
-			// 	m_renderWidth = 1408;
-			// 	m_renderHeight = 768;
-			// }
-			// else if (table[target_idx][2] == 1.5) {
-			// 	m_renderWidth = 1760;
-			// 	m_renderHeight = 960;
-			// }
-			// else if (table[target_idx][2] == 2) {
-			// 	m_renderWidth = 2112;
-			// 	m_renderHeight = 1184;
-			// }
-			// else if (table[target_idx][2] == 2.5) {
-			// 	m_renderWidth = 2496;
-			// 	m_renderHeight = 1344;
-			// }
-			// else if (table[target_idx][2] == 3) {
-			// 	m_renderWidth = 2880;
-			// 	m_renderHeight = 1568;
-			// }
+			for (int i = 0; i < 14670; i++) {
+				if (table[i][4] == latency[min_latency_diff_idx] && table[i][5] == throughput[min_throughput_diff_idx]) {
+					if (table[i][11] > current_mos) {
+						current_mos = table[i][11];
+						target_idx = i;
+					}
+				}
+			}
 
-			// update parameters
+			Info("throughput: %d", throughput[min_throughput_diff_idx]);
+			Info("latency: %d", latency[min_latency_diff_idx]);
+			Info("target idx: %d", target_idx);
+			Info("current_mos: %f", current_mos);
+
+			// update parameter
+			m_bitrate = table[target_idx][0];
+			m_refreshRate = table[target_idx][1];
+			m_renderWidth = table[target_idx][2];
+			m_renderHeight = table[target_idx][3];
+
+			// update and reset parameters
 			init_time_br = cur_time;
 			updateFlag = true;
-			// min_latency_diff = 10000;
-			// min_throughput_diff = 10000;
+			min_latency_diff = 10000;
+			min_throughput_diff = 10000;
+			current_mos = 0;
 
 			return true;
 		}
@@ -346,6 +336,10 @@ private:
 	uint64_t m_bitsSentInSecond;
 	uint64_t m_bitsSentInSecondPrev;
 
+	// [kyl throughput]
+	uint64_t m_throughput = 0;
+	// [kyl end]
+
 	uint32_t m_framesInSecond;
 	uint32_t m_framesPrevious;
 
@@ -388,8 +382,6 @@ private:
 
 	// [kyl] begin
 	time_t init_time_br;
-	time_t init_time_fr;
-	time_t init_time_re;
 
 	std::vector<std::vector<float>> table;
 	std::vector<float> row;

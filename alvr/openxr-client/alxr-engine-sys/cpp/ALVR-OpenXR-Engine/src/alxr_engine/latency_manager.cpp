@@ -10,6 +10,9 @@ LatencyManager LatencyManager::m_instance{};
 
 void LatencyManager::OnTimeSyncRecieved(const TimeSync& timeSync)
 {
+    // [kyl throughput]
+    LatencyCollector::Instance().countPacket(sizeof(TrackingInfo));
+    // [kyl end]
     if (timeSync.mode == 1) {
         LatencyCollector::Instance().setTotalLatency(timeSync.serverTotalLatency);
         const std::uint64_t Current = GetSystemTimestampUs();
@@ -23,9 +26,6 @@ void LatencyManager::OnTimeSyncRecieved(const TimeSync& timeSync)
             sendBuf.clientTime = Current;
             m_callbackCtx.timeSyncSendFn(&sendBuf);
         }
-        // [kyl throughput]
-        LatencyCollector::Instance().countPacket(sizeof(TrackingInfo));
-        // [kyl end]
     }
     if (timeSync.mode == 3)
         LatencyCollector::Instance().received(timeSync.trackingRecvFrameIndex);
@@ -41,9 +41,10 @@ void LatencyManager::OnPreVideoPacketRecieved(const VideoFrame& header)
             0 : ((std::int64_t)header.sentTime - m_rt_state.timeDiff - timeStamp);
         LatencyCollector::Instance().estimatedSent(header.trackingFrameIndex, offset);
         m_rt_state.lastFrameIndex = header.trackingFrameIndex;
-        // [kyl throughput]
-        LatencyCollector::Instance().countPacket(sizeof(VideoFrame) + header.frameByteSize);
-        // [kyl end]
+
+        // // [kyl throughput]
+        // LatencyCollector::Instance().countPacket(sizeof(VideoFrame) + header.frameByteSize);
+        // // [kyl end]
     }
     if (const auto lostCount = ProcessVideoSeq(header))
         LatencyCollector::Instance().packetLoss(lostCount);
@@ -55,8 +56,12 @@ void LatencyManager::OnPostVideoPacketRecieved
     const LatencyManager::PacketRecievedStatus& status
 )
 {
-    if (status.complete)
+    if (status.complete) {
         LatencyCollector::Instance().receivedLast(header.trackingFrameIndex);
+        // [kyl throughput]
+        LatencyCollector::Instance().countPacket(sizeof(VideoFrame) + header.frameByteSize);
+        // [kyl end]
+    }
     if (status.fecFailed) {
         LatencyCollector::Instance().fecFailure();
         SendPacketLossReport(0, 0);

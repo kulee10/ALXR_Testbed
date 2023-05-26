@@ -516,13 +516,14 @@ pub struct Settings {
     pub extra: ExtraDesc,
 }
 
+// [kyl parameters]
 pub fn session_settings_default() -> SettingsDefault {
     SettingsDefault {
         video: VideoDescDefault {
             adapter_index: 0,
             render_resolution: FrameSizeDefault {
                 variant: FrameSizeDefaultVariant::Scale,
-                Scale: 0.75,
+                Scale: 1.0,
                 Absolute: FrameSizeAbsoluteDefault {
                     width: 2880,
                     height: 1600,
