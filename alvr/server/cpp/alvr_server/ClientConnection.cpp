@@ -218,9 +218,12 @@ void ClientConnection::ProcessTimeSync(TimeSync data) {
 
 			Info("[kyl_instantaneousBitrate]: %.3f", m_Statistics->GetBitsSentInSecond() / 1000. / 1000.0);
 			m_Statistics->updateThroughput(m_reportedStatistics.bitsSentInSecond / 1000. / 1000.0);
-			Info("[kyl_throughput]: %.3f", m_reportedStatistics.bitsSentInSecond / 1000. / 1000.0);
-			Info("[kyl_PacketLossRate]: %.2f%", (m_reportedStatistics.packetsLostTotal / m_Statistics->GetPacketsSentTotal()) * 100);
-			Info("[kyl_totalLatency]: %.3f", sendBuf.serverTotalLatency / 1000.0);
+			Info("[kyl_instantaneousThroughput]: %.3f", m_reportedStatistics.bitsSentInSecond / 1000. / 1000.0);
+			Info("[kyl_ewmaThroughput]: %d", m_Statistics->GetThroughput());
+			// Info("[kyl_PacketLossRate]: %.2f%", (m_reportedStatistics.packetsLostTotal / m_Statistics->GetPacketsSentTotal()) * 100);
+			Info("[kyl_instantaneousTotalLatency]: %.3f", sendBuf.serverTotalLatency / 1000.0);
+			Info("[kyl_instantaneousSendLatency]: %.3f", m_reportedStatistics.averageSendLatency / 1000.0);
+			// Info("[kyl_ewmaTotalLatency]: %d", m_Statistics->GetTotalLatencyAverage() / 1000.0);
 
 			m_LastStatisticsUpdate = now;
 			m_Statistics->Reset();

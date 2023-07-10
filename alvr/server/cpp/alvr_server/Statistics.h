@@ -24,6 +24,7 @@ public:
 
 		// [kyl] begin
 		init_time_br = time(NULL);
+		idle_time = time(NULL);
 		readcsv();
 		// [kyl] end
 	}
@@ -100,7 +101,7 @@ public:
 		if (m_totalLatency == 0) {
 			m_totalLatency = latencyUs;
 		} else {
-			m_totalLatency = latencyUs * 0.05 + m_totalLatency * 0.95;
+			m_totalLatency = latencyUs * 0.5 + m_totalLatency * 0.5;
 		}
 	}
 
@@ -110,7 +111,7 @@ public:
 		if (m_sendLatency == 0) {
 			m_sendLatency = latencyUs;
 		} else {
-			m_sendLatency = latencyUs * 0.1 + m_sendLatency * 0.9;
+			m_sendLatency = latencyUs * 0.5 + m_sendLatency * 0.5;
 		}
 	}
 
@@ -138,6 +139,10 @@ public:
 	}
 	uint32_t GetHeight() {
 		return m_renderHeight;
+	}
+
+	uint64_t GetThroughput() {
+		return m_throughput;
 	}
 	// [kyl] end
 
@@ -170,12 +175,19 @@ public:
 	}
 
 	void updateThroughput(uint64_t throughput) {
-		m_throughput = throughput;
+		m_throughput = alpha * throughput + (1-alpha) * m_throughput;
+		// m_throughput = throughput;
 	}
 
 	bool CheckUpdate() {
 		time_t cur_time = time(NULL);
-		int interval = cur_time - init_time_br;
+		int interval = cur_time - idle_time;
+		if (interval > 10) { // avoid idle time
+			interval = cur_time - init_time_br;
+		}
+		else {
+			interval = 0;
+		}
 
 		// reconfiguration periodically (10s)
 		if (interval >= 5) {
@@ -382,6 +394,7 @@ private:
 
 	// [kyl] begin
 	time_t init_time_br;
+	time_t idle_time;
 
 	std::vector<std::vector<float>> table;
 	std::vector<float> row;
@@ -401,8 +414,8 @@ private:
 	int min_throughput_diff_idx = 0;
 	float current_mos = 0;
 	int target_idx = 0;
-
 	bool updateFlag = false;
+	float alpha = 0.5;
 	// [kyl] end
 	
 	// Total/Encode/Send/Decode/ClientFPS/Ping

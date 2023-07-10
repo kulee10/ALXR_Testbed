@@ -113,7 +113,7 @@ async fn client_handshake() -> StrResult<ConnectionInfo> {
     //     {
     //         break pair;
     //     }
-
+    info!("Start Handshake");
     let (mut proto_socket, client_ip) = loop {
         if let Ok(pair) =
             ProtoControlSocket::connect_to(PeerType::AnyClient).await
@@ -121,7 +121,7 @@ async fn client_handshake() -> StrResult<ConnectionInfo> {
             break pair;
         }
 
-        debug!("Timeout while searching for client. Retrying");
+        info!("Timeout while searching for client. Retrying");
         time::sleep(CONTROL_CONNECT_RETRY_PAUSE).await;
     };
 
