@@ -25,12 +25,64 @@ public:
 		// [kyl] begin
 		init_time_br = time(NULL);
 		idle_time = time(NULL);
-		readcsv();
+		readTable();
+		readConfig();
 		// [kyl] end
 	}
 
 	// [kyl] begin
-	void readcsv() {
+	void readConfig() {
+		std::fstream file("D:/kyl/ALXR_Testbed/alvr/config/config.csv", std::ios::in);
+		bool first = true;
+		if (file.is_open()) {
+			while (getline(file, line)) {
+				if (!first) {
+					row.clear();
+					std::stringstream str(line);
+					while(getline(str, word, ','))
+						row.push_back(std::stof(word));
+					vr_exp = row[0];
+					gaming_freq = row[1];
+					SI = row[2];
+					TI = row[3];
+					table_ID = row[4];
+
+					// choose table
+					if (table_ID == 0) {
+						table = table_general;
+						row_num = 14670;
+						Info("Table: general");
+						Info("entries: %d", table.size());
+					}
+					else if (table_ID == 1) {
+						table = table_angryBird;
+						row_num = 4890;
+						Info("Table: angryBird");
+						Info("entries: %d", table.size());
+					}
+					else if (table_ID == 2) {
+						table = table_beatSaber;
+						row_num = 4890;
+						Info("Table: beatSaber");
+						Info("entries: %d", table.size());
+					}
+					else if (table_ID == 3) {
+						table = table_artPuzzle;
+						row_num = 4890;
+						Info("Table: artPuzzle");
+						Info("entries: %d", table.size());
+					}
+				}
+				else {
+					first = false;
+				}
+			}
+			file.close();
+		}
+	}
+
+	void readTable() {
+		// general table
 		std::fstream file("D:/kyl/QoE_Modeling/lookupTable_interpolate.csv", std::ios::in);
 		bool first = true;
 		if (file.is_open()) {
@@ -40,13 +92,70 @@ public:
 					std::stringstream str(line);
 					while(getline(str, word, ','))
 						row.push_back(std::stof(word));
-					table.push_back(row);
+					table_general.push_back(row);
 				}
 				else {
 					first = false;
 				}
 			}
 			file.close();
+		}
+
+		// angryBird table
+		std::fstream file_a("D:/kyl/QoE_Modeling/lookupTable_angryBird_interpolate.csv", std::ios::in);
+		first = true;
+		if (file_a.is_open()) {
+			while (getline(file_a, line)) {
+				if (!first) {
+					row.clear();
+					std::stringstream str(line);
+					while(getline(str, word, ','))
+						row.push_back(std::stof(word));
+					table_angryBird.push_back(row);
+				}
+				else {
+					first = false;
+				}
+			}
+			file_a.close();
+		}
+
+		// beatSaber table
+		std::fstream file_b("D:/kyl/QoE_Modeling/lookupTable_beatSaber_interpolate.csv", std::ios::in);
+		first = true;
+		if (file_b.is_open()) {
+			while (getline(file_b, line)) {
+				if (!first) {
+					row.clear();
+					std::stringstream str(line);
+					while(getline(str, word, ','))
+						row.push_back(std::stof(word));
+					table_beatSaber.push_back(row);
+				}
+				else {
+					first = false;
+				}
+			}
+			file_b.close();
+		}
+
+		// artPuzzle table
+		std::fstream file_p("D:/kyl/QoE_Modeling/lookupTable_artPuzzle_interpolate.csv", std::ios::in);
+		first = true;
+		if (file_p.is_open()) {
+			while (getline(file_p, line)) {
+				if (!first) {
+					row.clear();
+					std::stringstream str(line);
+					while(getline(str, word, ','))
+						row.push_back(std::stof(word));
+					table_artPuzzle.push_back(row);
+				}
+				else {
+					first = false;
+				}
+			}
+			file_p.close();
 		}
 	}
 	// [kyl] end
@@ -174,6 +283,10 @@ public:
 		updateFlag = false;
 	}
 
+	float getTableID() {
+		return table_ID;
+	}
+
 	void updateThroughput(uint64_t throughput) {
 		m_throughput = alpha * throughput + (1-alpha) * m_throughput;
 		// m_throughput = throughput;
@@ -189,13 +302,14 @@ public:
 			interval = 0;
 		}
 
-		// reconfiguration periodically (10s)
+		// reconfiguration periodically (5s)
 		if (interval >= 5) {
 			// match latency
 			for (int i = 0; i < 5; i++) {
-				latency_diff = m_totalLatency - latency[i];
+				latency_diff = (m_totalLatency / 1000) - latency[i];
 				latency_diff = abs(latency_diff);
-				if (latency_diff < min_latency_diff) {
+				// Info("latency_diff: %d", latency_diff);
+				if (latency_diff <= min_latency_diff) {
 					min_latency_diff = latency_diff;
 					min_latency_diff_idx = i;
 				}
@@ -205,18 +319,31 @@ public:
 			for (int i = 0; i < 7; i++) {
 				throughput_diff = m_throughput - throughput[i]; 
 				throughput_diff = abs(throughput_diff);
-				if (throughput_diff < min_throughput_diff) {
+				// Info("throughput_diff: %d", throughput_diff);
+				if (throughput_diff <= min_throughput_diff) {
 					min_throughput_diff = throughput_diff;
 					min_throughput_diff_idx = i;
 				}
 			}
 			
 			// match table
-			for (int i = 0; i < 14670; i++) {
-				if (table[i][4] == latency[min_latency_diff_idx] && table[i][5] == throughput[min_throughput_diff_idx]) {
-					if (table[i][11] > current_mos) {
-						current_mos = table[i][11];
-						target_idx = i;
+			for (int i = 0; i < row_num; i++) {
+				if (table_ID == 0) {
+					if (table[i][4] == latency[min_latency_diff_idx] && table[i][5] == throughput[min_throughput_diff_idx] && table[i][7] == vr_exp && table[i][8] == gaming_freq && table[i][9] == SI && table[i][10] == TI) {
+						// float mos_diff = abs(table[i][11] - current_mos);
+						if (table[i][11] >= current_mos) {
+							current_mos = table[i][11];
+							target_idx = i;
+						}
+					}
+				}
+				else {
+					if (table[i][4] == latency[min_latency_diff_idx] && table[i][5] == throughput[min_throughput_diff_idx] && table[i][7] == vr_exp && table[i][8] == gaming_freq) {
+						// float mos_diff = abs(table[i][11] - current_mos);
+						if (table[i][9] >= current_mos) {
+							current_mos = table[i][9];
+							target_idx = i;
+						}
 					}
 				}
 			}
@@ -226,17 +353,39 @@ public:
 			Info("target idx: %d", target_idx);
 			Info("current_mos: %f", current_mos);
 
-			// update parameter
-			m_bitrate = table[target_idx][0];
-			m_refreshRate = table[target_idx][1];
-			m_renderWidth = table[target_idx][2];
-			m_renderHeight = table[target_idx][3];
+			// increase the bitrate if the parameter didn't update
+			if (target_idx == prev_idx) {	
+				Info("Increase bitrate!");
+				if (m_bitrate <= 31) {
+					m_bitrate += 1;
+				}
+				else {
+					m_bitrate = 32;
+				}
+
+				// bitrate debug
+				if (m_bitrate > 32) {
+					Info("Exceed bitrate bound!");
+				}
+			}
+			else {
+				// update parameters
+				m_bitrate = table[target_idx][0];
+				m_refreshRate = table[target_idx][1];
+				m_renderWidth = table[target_idx][2];
+				m_renderHeight = table[target_idx][3];
+			}
+
+			// save previous parameters
+			prev_idx = target_idx;
 
 			// update and reset parameters
 			init_time_br = cur_time;
 			updateFlag = true;
 			min_latency_diff = 10000;
 			min_throughput_diff = 10000;
+			min_throughput_diff_idx = 0;
+			min_latency_diff_idx = 0;
 			current_mos = 0;
 
 			return true;
@@ -397,23 +546,32 @@ private:
 	time_t idle_time;
 
 	std::vector<std::vector<float>> table;
+	std::vector<std::vector<float>> table_general;
+	std::vector<std::vector<float>> table_angryBird;
+	std::vector<std::vector<float>> table_beatSaber;
+	std::vector<std::vector<float>> table_artPuzzle;
+	float table_ID = 0;
+	int row_num = 14670;
 	std::vector<float> row;
 	std::string line, word;
 
 	// quality modeling inputs
-	int vr_exp = 0;
-	int gaming_freq = 1;
+	float vr_exp = 0;
+	float gaming_freq = 1;
+	float SI = 35.72;
+	float TI = 24.41;
 	int latency[5] = {77, 149, 219, 384, 583};
 	int throughput[7] = {4, 6, 18, 21, 26, 30, 36};
 	int packetloss[1] = {0};
-	float latency_diff = 0;
-	float min_latency_diff = 10000;
+	int latency_diff = 0;
+	int min_latency_diff = 10000;
 	int min_latency_diff_idx = 0;
-	float throughput_diff = 0;
-	float min_throughput_diff = 10000;
+	int throughput_diff = 0;
+	int min_throughput_diff = 10000;
 	int min_throughput_diff_idx = 0;
 	float current_mos = 0;
 	int target_idx = 0;
+	int prev_idx = 0;
 	bool updateFlag = false;
 	float alpha = 0.5;
 	// [kyl] end

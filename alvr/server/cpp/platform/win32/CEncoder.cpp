@@ -141,8 +141,10 @@ using namespace DirectX;
 
 				// [kyl] begin
 				if (m_Listener->GetStatistics()->checkUpdateFlag()) {
-					renderWidth = m_Listener->GetStatistics()->GetWidth();
-					renderHeight = m_Listener->GetStatistics()->GetHeight();
+					if (m_Listener->GetStatistics()->getTableID() == 0) {
+						renderWidth = m_Listener->GetStatistics()->GetWidth();
+						renderHeight = m_Listener->GetStatistics()->GetHeight();
+					}
 					isUpdate = true;
 					Info("renderWidth: %d", renderWidth);
 					Info("renderHeight: %d", renderHeight);
