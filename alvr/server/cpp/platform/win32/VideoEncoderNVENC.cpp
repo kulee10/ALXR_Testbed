@@ -151,6 +151,24 @@ void VideoEncoderNVENC::Transmit(ID3D11Texture2D *pTexture, uint64_t presentatio
 		}
 		// Info("[NVENC] Reconfigure returned!\n");
 	}
+	else if (m_Listener->GetStatistics()->getAlgoID() == 1 && m_Listener->GetStatistics()->CheckBitrateUpdated()) {
+		m_bitrateInMBits = m_Listener->GetStatistics()->GetBitrate();
+		NV_ENC_INITIALIZE_PARAMS initializeParams = { NV_ENC_INITIALIZE_PARAMS_VER };
+		NV_ENC_CONFIG encodeConfig = { NV_ENC_CONFIG_VER };
+		initializeParams.encodeConfig = &encodeConfig;
+		FillEncodeConfig(initializeParams, m_refreshRate, encodeWidth, encodeHeight, m_bitrateInMBits * 1'000'000);
+		NV_ENC_RECONFIGURE_PARAMS reconfigureParams = { NV_ENC_RECONFIGURE_PARAMS_VER };
+		reconfigureParams.reInitEncodeParams = initializeParams;
+		reconfigureParams.forceIDR = ffrChange;
+
+		#include "NvEncoder.h"
+		try {
+			m_NvNecoder->Reconfigure(&reconfigureParams);
+		}
+		catch (const NVENCException &e){
+			Error("[NVENC] Reconfigure throws \"%s\"\n", e.what());
+		}
+	}
 
 	std::vector<std::vector<uint8_t>> vPacket;
 

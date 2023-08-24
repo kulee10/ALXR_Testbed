@@ -575,7 +575,7 @@ pub fn session_settings_default() -> SettingsDefault {
                 // [kyl] change
                 enabled: false,
                 content: AdaptiveBitrateDescDefault {
-                    bitrate_maximum: 200,
+                    bitrate_maximum: 32,
                     latency_target: 12000,
                     latency_use_frametime: SwitchDefault {
                         enabled: false,

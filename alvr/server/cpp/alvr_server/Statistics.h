@@ -46,6 +46,7 @@ public:
 					SI = row[2];
 					TI = row[3];
 					table_ID = row[4];
+					algo_ID = row[5];
 
 					// choose table
 					if (table_ID == 0) {
@@ -287,6 +288,10 @@ public:
 		return table_ID;
 	}
 
+	float getAlgoID() {
+		return algo_ID;
+	}
+
 	void updateThroughput(uint64_t throughput) {
 		m_throughput = alpha * throughput + (1-alpha) * m_throughput;
 		// m_throughput = throughput;
@@ -303,7 +308,7 @@ public:
 		}
 
 		// reconfiguration periodically (5s)
-		if (interval >= 5) {
+		if (interval >= 5 && algo_ID == 2) {
 			// match latency
 			for (int i = 0; i < 5; i++) {
 				latency_diff = (m_totalLatency / 1000) - latency[i];
@@ -395,28 +400,28 @@ public:
 
 	// bitrate update algorithm
 	bool CheckBitrateUpdated() {
-		// if (m_enableAdaptiveBitrate) {
-		// 	uint64_t latencyUs = m_sendLatency;
-		// 	if (latencyUs != 0) {
-		// 		if (latencyUs > m_adaptiveBitrateTarget + m_adaptiveBitrateThreshold) {
-		// 			if (m_bitrate < 5 + m_adaptiveBitrateDownRate)
-		// 				m_bitrate = 5;
-		// 			else
-		// 				m_bitrate -= m_adaptiveBitrateDownRate;
-		// 		} else if (latencyUs < m_adaptiveBitrateTarget - m_adaptiveBitrateThreshold) {
-		// 			if (m_bitrate > m_adaptiveBitrateMaximum - m_adaptiveBitrateDownRate)
-		// 				m_bitrate = m_adaptiveBitrateMaximum;
-		// 			else if (m_bitsSentInSecondPrev * 1e-6 > m_bitrate * m_adaptiveBitrateLightLoadThreshold * (m_framesPrevious == 0 ? m_refreshRate : m_framesPrevious) / m_refreshRate)
-		// 				m_bitrate += m_adaptiveBitrateUpRate;
-		// 		}
-		// 	}
-		// 	if (m_bitrateUpdated != m_bitrate) {
-		// 		m_bitrateUpdated = m_bitrate;
-		// 		return true;
-		// 	}
-		// }
-
-		return false;
+		Info("ALVR Adaptation");
+		uint64_t latencyUs = m_sendLatency;
+		if (latencyUs != 0) {
+			if (latencyUs > m_adaptiveBitrateTarget + m_adaptiveBitrateThreshold) {
+				if (m_bitrate < 2 + m_adaptiveBitrateDownRate)
+					m_bitrate = 2;
+				else
+					m_bitrate -= m_adaptiveBitrateDownRate;
+			} else if (latencyUs < m_adaptiveBitrateTarget - m_adaptiveBitrateThreshold) {
+				if (m_bitrate > m_adaptiveBitrateMaximum - m_adaptiveBitrateUpRate)
+					m_bitrate = m_adaptiveBitrateMaximum;
+				else if (m_bitsSentInSecondPrev * 1e-6 > m_bitrate * m_adaptiveBitrateLightLoadThreshold * (m_framesPrevious == 0 ? m_refreshRate : m_framesPrevious) / m_refreshRate)
+					m_bitrate += m_adaptiveBitrateUpRate;
+			}
+		}
+		if (m_bitrateUpdated != m_bitrate) {
+			m_bitrateUpdated = m_bitrate;
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
 	// framerate update algorithm
@@ -554,6 +559,7 @@ private:
 	int row_num = 14670;
 	std::vector<float> row;
 	std::string line, word;
+	float algo_ID = 0;
 
 	// quality modeling inputs
 	float vr_exp = 0;
