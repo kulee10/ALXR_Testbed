@@ -141,15 +141,17 @@ using namespace DirectX;
 
 				// [kyl] begin
 				if (m_Listener->GetStatistics()->checkUpdateFlag()) {
-					if (m_Listener->GetStatistics()->getTableID() == 0) {
-						renderWidth = m_Listener->GetStatistics()->GetWidth();
-						renderHeight = m_Listener->GetStatistics()->GetHeight();
-					}
+					// if (m_Listener->GetStatistics()->getTableID() == 0) {
+					renderWidth = m_Listener->GetStatistics()->GetWidth();
+					renderHeight = m_Listener->GetStatistics()->GetHeight();
+					// }
 					isUpdate = true;
 					Info("renderWidth: %d", renderWidth);
 					Info("renderHeight: %d", renderHeight);
 					// m_FrameRender = std::make_shared<FrameRender>(m_d3dRender, frames_vec_ptr, timeStamp_ptr, qrcodeTex);
-					m_FrameRender->Startup(m_ffrDataNext, renderWidth, renderHeight);
+					if (m_Listener->GetStatistics()->checkResUpdateFlag()) {
+						m_FrameRender->Startup(m_ffrDataNext, renderWidth, renderHeight);
+					}
 					m_Listener->GetStatistics()->resetUpdateFlag();
 				}
 				else {

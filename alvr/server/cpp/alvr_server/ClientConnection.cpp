@@ -9,7 +9,7 @@
 #include "Settings.h"
 #include "alvr_server.h"
 
-const int64_t STATISTICS_TIMEOUT_US = 100 * 1000;
+const int64_t STATISTICS_TIMEOUT_US = 1000 * 1000;
 
 ClientConnection::ClientConnection() : m_LastStatisticsUpdate(0) {
 
@@ -220,9 +220,13 @@ void ClientConnection::ProcessTimeSync(TimeSync data) {
 			m_Statistics->updateThroughput(m_reportedStatistics.bitsSentInSecond / 1000. / 1000.0);
 			Info("[kyl_instantaneousThroughput]: %.3f", m_reportedStatistics.bitsSentInSecond / 1000. / 1000.0);
 			Info("[kyl_ewmaThroughput]: %d", m_Statistics->GetThroughput());
-			// Info("[kyl_PacketLossRate]: %.2f%", (m_reportedStatistics.packetsLostTotal / m_Statistics->GetPacketsSentTotal()) * 100);
 			Info("[kyl_instantaneousTotalLatency]: %.3f", sendBuf.serverTotalLatency / 1000.0);
-			Info("[kyl_instantaneousSendLatency]: %.3f", m_reportedStatistics.averageSendLatency / 1000.0);
+			Info("[kyl_instantaneousTransportLatency]: %.3f", m_reportedStatistics.averageTransportLatency / 1000.0);
+			if (m_Statistics->GetPacketsSentInSecond() != 0 && m_Statistics->GetPacketsSentInSecond() > m_reportedStatistics.packetsLostInSecond) {
+				// Info("[kyl_PacketLossinSecond]: %d", m_reportedStatistics.packetsLostInSecond);
+				// Info("[kyl_PacketinSecond]: %d", m_Statistics->GetPacketsSentInSecond());
+				Info("[kyl_PacketLossRate]: %.2f", (static_cast<double>(m_reportedStatistics.packetsLostInSecond) / static_cast<double>(m_Statistics->GetPacketsSentInSecond())) * 100);
+			}
 			// Info("[kyl_ewmaTotalLatency]: %d", m_Statistics->GetTotalLatencyAverage() / 1000.0);
 
 			m_LastStatisticsUpdate = now;

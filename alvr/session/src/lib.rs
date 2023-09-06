@@ -194,7 +194,7 @@ impl Default for SessionDesc {
                 sw_thread_count: 0,
                 encode_bitrate_mbs: 32,
                 enable_adaptive_bitrate: false,
-                bitrate_maximum: 200,
+                bitrate_maximum: 32,
                 latency_target: 12000,
                 latency_use_frametime: false,
                 latency_target_maximum: 30000,
