@@ -256,7 +256,7 @@ class Statistics {
     // [kyl] begin
     bool checkUpdateFlag() { return updateFlag; }
 
-    bool checkResUpdateFlag() {return resUpdate;}
+    bool checkResUpdateFlag() { return resUpdate; }
 
     void resetUpdateFlag() { updateFlag = false; }
 
@@ -283,8 +283,8 @@ class Statistics {
             interval = 0;
         }
 
-        // reconfiguration periodically (5s)
-        if (interval >= 1 && algo_ID == 2) {
+        // reconfiguration periodically (3s)
+        if (interval >= 3 && algo_ID == 2) {
             // match latency
             for (int i = 0; i < 5; i++) {
                 latency_diff = (m_totalLatency / 1000) - latency[i];
@@ -339,7 +339,8 @@ class Statistics {
             Info("current_mos: %f", current_mos);
 
             // increase the bitrate if the parameter didn't update
-            if (target_idx == prev_idx && m_sendLatency < m_adaptiveBitrateTarget - m_adaptiveBitrateThreshold) {
+            if (target_idx == prev_idx &&
+                m_sendLatency < m_adaptiveBitrateTarget - m_adaptiveBitrateThreshold) {
                 Info("Increase bitrate!");
                 if (m_bitrate <= 32) {
                     m_bitrate += 1;
@@ -356,10 +357,10 @@ class Statistics {
                 m_bitrate = table[target_idx][0];
                 m_refreshRate = table[target_idx][1];
 
-                if (m_renderWidth == table[target_idx][2] && m_renderHeight ==table[target_idx][3]) {
+                if (m_renderWidth == table[target_idx][2] &&
+                    m_renderHeight == table[target_idx][3]) {
                     resUpdate = false;
-                }
-                else {
+                } else {
                     resUpdate = true;
                     m_renderWidth = table[target_idx][2];
                     m_renderHeight = table[target_idx][3];

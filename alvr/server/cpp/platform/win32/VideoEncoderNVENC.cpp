@@ -198,7 +198,7 @@ void VideoEncoderNVENC::Transmit(ID3D11Texture2D *pTexture, uint64_t presentatio
 		box.front = 0, box.back = 1;
 		m_pD3DRender->GetContext()->CopySubresourceRegion(
 			pInputTexture, 0,
-			m_renderWidth*5/72, m_renderHeight/8, 0,
+			m_renderWidth/4, m_renderHeight/5, 0,
 			qrcodeTex_ptr[qrcode_cnt%1000], 0, &box
 		);
 
