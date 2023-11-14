@@ -24,6 +24,9 @@
 
 // [kyl] begin
 #include "alvr_server/alvr_server.h"
+#include <cwchar>
+#include <locale>
+#include <codecvt>
 // [kyl] end
 
 
@@ -58,10 +61,12 @@
 
 		bool m_bExiting;
 		uint64_t m_targetTimestampNs;
-		wchar_t filepath[256];
 
         // [kyl] begin
         uint64_t timeStamp;
+		wchar_t filepath[256];
+		std::ifstream if_read;
+		std::string base_dir;
         // [kyl] end
 	};
 

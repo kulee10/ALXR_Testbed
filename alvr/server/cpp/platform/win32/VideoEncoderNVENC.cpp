@@ -86,10 +86,20 @@ void VideoEncoderNVENC::Initialize()
 	}
 
 	// [kyl] begin
-	if(remove("encodeVideo.264") != 0)
+	if_read.open("D:/kyl/ALXR_Testbed/alvr/config/testcase.txt");
+	std::getline(if_read ,base_dir);
+	filepath = base_dir + "/encodeVideo.264";
+	// Info("encode264 target dir: %s\n", filepath);
+	if_read.close();
+
+	if(remove(filepath.c_str()) != 0)
 		Info("Error deleting H264 file");
   	else
 		Info("H264 file successfully deleted");
+	// if(remove("encodeVideo.264") != 0)
+	// 	Info("Error deleting H264 file");
+  	// else
+	// 	Info("H264 file successfully deleted");
 	// [kyl] end
 
 	Debug("CNvEncoder is successfully initialized.\n");
@@ -244,7 +254,8 @@ void VideoEncoderNVENC::Transmit(ID3D11Texture2D *pTexture, uint64_t presentatio
 	}
 
 	// [kyl] begin
-	fs.open("encodeVideo.264", std::fstream::out |  std::fstream::binary | std::fstream::app);
+	// fs.open("encodeVideo.264", std::fstream::out |  std::fstream::binary | std::fstream::app);
+	fs.open(filepath, std::fstream::out |  std::fstream::binary | std::fstream::app);
 
 	m_nFrame += (int)vPacket.size();
 	for (std::vector<uint8_t> &packet : vPacket)

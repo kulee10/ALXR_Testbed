@@ -89,6 +89,7 @@ fn main() {
 
     let cpp_paths = common_iter
         .chain(platform_iter)
+        // .chain(d3d_iter)
         .filter_map(|maybe_entry| maybe_entry.ok())
         .map(|entry| entry.into_path())
         .collect::<Vec<_>>();
@@ -110,6 +111,8 @@ fn main() {
         .flag_if_supported("-std=c++17")
         .include("cpp/openvr/headers")
         .include("cpp");
+        // .include("cpp/onnxruntime/include");
+        // .include("cpp/include")
 
     #[cfg(windows)]
     build
@@ -156,6 +159,36 @@ fn main() {
         cpp_dir.join("openvr/lib").to_string_lossy()
     );
     println!("cargo:rustc-link-lib=openvr_api");
+    // println!("cargo:rustc-link-lib=onnxruntime");
+    // println!("cargo:rustc-link-lib=onnxruntime_providers_shared");
+
+    // println!(
+    //     "cargo:rustc-link-search=native={}",
+    //     cpp_dir.join("lib").to_string_lossy()
+    // );
+    // println!("cargo:rustc-link-lib=asmjit");
+    // println!("cargo:rustc-link-lib=c10");
+    // println!("cargo:rustc-link-lib=clog");
+    // println!("cargo:rustc-link-lib=cpuinfo");
+    // println!("cargo:rustc-link-lib=dnnl");
+    // println!("cargo:rustc-link-lib=fbgemm");
+    // println!("cargo:rustc-link-lib=fbjni");
+    // println!("cargo:rustc-link-lib=fmt");
+    // println!("cargo:rustc-link-lib=kineto");
+    // println!("cargo:rustc-link-lib=libprotobuf-lite");
+    // println!("cargo:rustc-link-lib=libprotobuf");
+    // println!("cargo:rustc-link-lib=pthreadpool");
+    // println!("cargo:rustc-link-lib=pytorch_jni");
+    // println!("cargo:rustc-link-lib=torch_cpu");
+    // println!("cargo:rustc-link-lib=torch");
+    // println!("cargo:rustc-link-lib=XNNPACK");
+
+    // println!(
+    //     "cargo:rustc-link-search=native={}",
+    //     cpp_dir.join(("onnxruntime/lib").to_string_lossy()
+    // );
+    // println!("cargo:rustc-link-lib=onnxruntime");
+    // println!("cargo:rustc-link-lib=onnxruntime_providers_shared");
 
     #[cfg(target_os = "linux")]
     {

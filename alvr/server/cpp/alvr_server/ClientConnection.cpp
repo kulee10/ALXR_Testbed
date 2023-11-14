@@ -219,7 +219,7 @@ void ClientConnection::ProcessTimeSync(TimeSync data) {
 			Info("[kyl_instantaneousBitrate]: %.3f", m_Statistics->GetBitsSentInSecond() / 1000. / 1000.0);
 			m_Statistics->updateThroughput(m_reportedStatistics.bitsSentInSecond / 1000. / 1000.0);
 			Info("[kyl_instantaneousThroughput]: %.3f", m_reportedStatistics.bitsSentInSecond / 1000. / 1000.0);
-			Info("[kyl_ewmaThroughput]: %d", m_Statistics->GetThroughput());
+			Info("[kyl_ewmaThroughput]: %f", m_Statistics->GetThroughput());
 			Info("[kyl_instantaneousTotalLatency]: %.3f", sendBuf.serverTotalLatency / 1000.0);
 			Info("[kyl_instantaneousTransportLatency]: %.3f", m_reportedStatistics.averageTransportLatency / 1000.0);
 			if (m_Statistics->GetPacketsSentInSecond() != 0 && m_Statistics->GetPacketsSentInSecond() > m_reportedStatistics.packetsLostInSecond) {

@@ -28,6 +28,12 @@ std::mutex lock;
             frames_vec_ptr = frames_vec;
 			timeStamp_ptr = timeStamp;
 			m_pD3DRender = d3dRender;
+
+			// read target file path
+			if_read.open("D:/kyl/ALXR_Testbed/alvr/config/testcase.txt");
+			std::getline(if_read ,base_dir);
+			// Info("target dir: %s\n", base_dir);
+			if_read.close();
 		}
 
 		void OutputFrame::Run()
@@ -57,7 +63,10 @@ std::mutex lock;
 						value = (int)(timeStamp%1000);
 						now_frame = frame_count;
 						frame_count++;
-						swprintf_s(filepath, L"frames/%lld_%lld.png", round, value);
+						// swprintf_s(filepath, L"frames/%lld_%lld.png", round, value);
+						std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    					std::wstring wide_base_dir = converter.from_bytes(base_dir);
+						swprintf_s(filepath, L"%s/frames/%d_%d.png", wide_base_dir.c_str(), round, value);
 						lock.unlock();
 						hr = SaveToWICFile(img.GetImages(), img.GetImageCount(), WIC_FLAGS_NONE, GUID_ContainerFormatPng, filepath, &GUID_WICPixelFormat24bppBGR);
 						if (FAILED(hr)) {

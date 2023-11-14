@@ -212,8 +212,8 @@ class Statistics {
         if (m_totalLatency == 0) {
             m_totalLatency = latencyUs;
         } else {
-            m_totalLatency = latencyUs * 0.5 + m_totalLatency * 0.5;
-            // m_totalLatency = latencyUs * 0.05 + m_totalLatency * 0.95;
+            // m_totalLatency = latencyUs * 0.5 + m_totalLatency * 0.5;
+            m_totalLatency = latencyUs * 0.05 + m_totalLatency * 0.95;
         }
     }
 
@@ -223,9 +223,9 @@ class Statistics {
         if (m_sendLatency == 0) {
             m_sendLatency = latencyUs;
         } else {
-            m_sendLatency = latencyUs;
+            // m_sendLatency = latencyUs;
             // m_sendLatency = latencyUs * 0.5 + m_sendLatency * 0.5;
-            // m_sendLatency = latencyUs * 0.1 + m_sendLatency * 0.9;
+            m_sendLatency = latencyUs * 0.1 + m_sendLatency * 0.9;
         }
     }
 
@@ -243,7 +243,7 @@ class Statistics {
     uint32_t GetWidth() { return m_renderWidth; }
     uint32_t GetHeight() { return m_renderHeight; }
 
-    uint64_t GetThroughput() { return m_throughput; }
+    float GetThroughput() { return m_throughput; }
     // [kyl] end
 
     uint64_t GetBitsSentTotal() { return m_bitsSentTotal; }
@@ -269,9 +269,9 @@ class Statistics {
     //////////////////////////////
     float getAlgoID() { return algo_ID; }
 
-    void updateThroughput(uint64_t throughput) {
-        m_throughput = alpha * throughput + (1 - alpha) * m_throughput;
-        // m_throughput = throughput;
+    void updateThroughput(float throughput) {
+        // m_throughput = alpha * throughput + (1 - alpha) * m_throughput;
+        m_throughput = throughput;
     }
 
     bool CheckUpdate() {
@@ -315,7 +315,7 @@ class Statistics {
                         table[i][7] == vr_exp && table[i][8] == gaming_freq && table[i][9] == SI &&
                         table[i][10] == TI) {
                         // float mos_diff = abs(table[i][11] - current_mos);
-                        if (table[i][11] >= current_mos) {
+                        if (table[i][11] > current_mos) {
                             current_mos = table[i][11];
                             target_idx = i;
                         }
@@ -325,7 +325,7 @@ class Statistics {
                         table[i][5] == throughput[min_throughput_diff_idx] &&
                         table[i][7] == vr_exp && table[i][8] == gaming_freq) {
                         // float mos_diff = abs(table[i][11] - current_mos);
-                        if (table[i][9] >= current_mos) {
+                        if (table[i][9] > current_mos) {
                             current_mos = table[i][9];
                             target_idx = i;
                         }
@@ -339,14 +339,10 @@ class Statistics {
             Info("current_mos: %f", current_mos);
 
             // increase the bitrate if the parameter didn't update
-            if (target_idx == prev_idx &&
-                m_sendLatency < m_adaptiveBitrateTarget - m_adaptiveBitrateThreshold) {
+            /*if (target_idx == prev_idx && m_sendLatency < m_adaptiveBitrateTarget - m_adaptiveBitrateThreshold) {*/
+            if (target_idx == prev_idx) {
                 Info("Increase bitrate!");
-                if (m_bitrate <= 32) {
-                    m_bitrate += 1;
-                } else {
-                    m_bitrate = 32;
-                }
+                m_bitrate = int(m_throughput);
 
                 // bitrate debug
                 if (m_bitrate > 32) {
@@ -485,7 +481,7 @@ class Statistics {
     uint64_t m_bitsSentInSecondPrev;
 
     // [kyl throughput]
-    uint64_t m_throughput = 0;
+    float m_throughput = 0;
     // [kyl end]
 
     uint32_t m_framesInSecond;

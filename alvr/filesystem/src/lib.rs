@@ -4,6 +4,10 @@ use std::{
         consts::{DLL_PREFIX, DLL_SUFFIX, EXE_SUFFIX},
     },
     path::{Path, PathBuf},
+    // [kyl] begin
+    fs::File,
+    io::prelude::*,
+    // [kyl] end
 };
 
 #[cfg(target_os = "linux")]
@@ -130,12 +134,20 @@ pub struct Layout {
 impl Layout {
     pub fn new(root: &Path) -> Self {
         if cfg!(any(windows, target_os = "macos")) {
+            // [kyl] begin
+            let mut txt_file = File::open("D:/kyl/ALXR_Testbed/alvr/config/testcase.txt").expect("File not found");
+            let mut base_dir = String::new();
+            txt_file.read_to_string(&mut base_dir).expect("Error while reading file");
+            // [kyl] end
             Self {
                 executables_dir: root.to_owned(),
                 libraries_dir: root.to_owned(),
                 static_resources_dir: root.to_owned(),
                 config_dir: root.to_owned(),
-                log_dir: root.to_owned(),
+                // log_dir: root.to_owned(),
+                // [kyl] begin
+                log_dir: Path::new(&base_dir).to_owned(),
+                // [kyl] end
                 openvr_driver_root_dir: root.to_owned(),
                 vrcompositor_wrapper_dir: root.to_owned(),
                 vulkan_layer_manifest_dir: root.to_owned(),

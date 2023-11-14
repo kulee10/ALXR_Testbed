@@ -62,6 +62,9 @@ private:
 
 	// [kyl] begin
 	std::fstream fs;
+	std::ifstream if_read;
+	std::string base_dir;
+	std::string filepath;
 	// [kyl] end
 
 };

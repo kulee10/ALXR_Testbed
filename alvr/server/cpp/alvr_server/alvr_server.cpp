@@ -23,6 +23,7 @@
 
 // [kyl] begin
 #include "alvr_server.h"
+// #include "onnxruntime_cxx_api.h"
 bool clientShutDown = false;
 // [kyl] end
 
@@ -181,12 +182,13 @@ void (*ShutdownRuntime)();
 unsigned long long (*PathStringToHash)(const char *path);
 
 // [SM] begin
-void(*FfrReconfigSend)(
-    unsigned long long timestamp,
-    float centerSizeX, float centerSizeY,
-    float centerShiftX, float centerShiftY,
-    float edgeRatioX, float edgeRatioY
-);
+void (*FfrReconfigSend)(unsigned long long timestamp,
+                        float centerSizeX,
+                        float centerSizeY,
+                        float centerShiftX,
+                        float centerShiftY,
+                        float edgeRatioX,
+                        float edgeRatioY);
 // [SM] end
 
 void *CppEntryPoint(const char *interface_name, int *return_code) {
@@ -304,11 +306,12 @@ void ClientDisconnect() {
 // [kyl] end
 
 // [SM] begin
-void ffrUpdate(
-    float centerSizeX, float centerSizeY,
-    float centerShiftX, float centerShiftY,
-    float edgeRatioX, float edgeRatioY
-){
+void ffrUpdate(float centerSizeX,
+               float centerSizeY,
+               float centerShiftX,
+               float centerShiftY,
+               float edgeRatioX,
+               float edgeRatioY) {
     FFRData ffrData = {};
     /* eyeWidth and eyeHeight are invalid here */
     ffrData.centerSizeX = centerSizeX, ffrData.centerSizeY = centerSizeY;
