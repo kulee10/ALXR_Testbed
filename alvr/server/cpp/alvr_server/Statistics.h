@@ -14,6 +14,7 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include "alvr_server.h"
 // [kyl] end
 
 class Statistics {
@@ -270,8 +271,8 @@ class Statistics {
     float getAlgoID() { return algo_ID; }
 
     void updateThroughput(float throughput) {
-        // m_throughput = alpha * throughput + (1 - alpha) * m_throughput;
-        m_throughput = throughput;
+        m_throughput = alpha * throughput + (1 - alpha) * m_throughput;
+        // m_throughput = throughput;
     }
 
     bool CheckUpdate() {
@@ -284,7 +285,8 @@ class Statistics {
         }
 
         // reconfiguration periodically (3s)
-        if (interval >= 3 && algo_ID == 2) {
+        if (interval >= 1 && algo_ID == 2 && captureTriggerValue) {
+            Info("start adaptation");
             // match latency
             for (int i = 0; i < 5; i++) {
                 latency_diff = (m_totalLatency / 1000) - latency[i];
@@ -342,7 +344,10 @@ class Statistics {
             /*if (target_idx == prev_idx && m_sendLatency < m_adaptiveBitrateTarget - m_adaptiveBitrateThreshold) {*/
             if (target_idx == prev_idx) {
                 Info("Increase bitrate!");
-                m_bitrate = int(m_throughput);
+                m_bitrate = int(m_throughput) + 1;
+                // if (m_bitrate <= 31) {
+                //     m_bitrate += 1;
+                // }
 
                 // bitrate debug
                 if (m_bitrate > 32) {
@@ -382,29 +387,30 @@ class Statistics {
 
     // bitrate update algorithm
     bool CheckBitrateUpdated() {
-        Info("ALVR Adaptation");
-        uint64_t latencyUs = m_sendLatency;
-        if (latencyUs != 0) {
-            if (latencyUs > m_adaptiveBitrateTarget + m_adaptiveBitrateThreshold) {
-                if (m_bitrate < 2 + m_adaptiveBitrateDownRate)
-                    m_bitrate = 2;
-                else
-                    m_bitrate -= m_adaptiveBitrateDownRate;
-            } else if (latencyUs < m_adaptiveBitrateTarget - m_adaptiveBitrateThreshold) {
-                if (m_bitrate > m_adaptiveBitrateMaximum - m_adaptiveBitrateUpRate)
-                    m_bitrate = m_adaptiveBitrateMaximum;
-                else if (m_bitsSentInSecondPrev * 1e-6 >
-                         m_bitrate * m_adaptiveBitrateLightLoadThreshold *
-                             (m_framesPrevious == 0 ? m_refreshRate : m_framesPrevious) /
-                             m_refreshRate)
-                    m_bitrate += m_adaptiveBitrateUpRate;
+        if (captureTriggerValue) {
+            uint64_t latencyUs = m_sendLatency;
+            if (latencyUs != 0) {
+                if (latencyUs > m_adaptiveBitrateTarget + m_adaptiveBitrateThreshold) {
+                    if (m_bitrate < 2 + m_adaptiveBitrateDownRate)
+                        m_bitrate = 2;
+                    else
+                        m_bitrate -= m_adaptiveBitrateDownRate;
+                } else if (latencyUs < m_adaptiveBitrateTarget - m_adaptiveBitrateThreshold) {
+                    if (m_bitrate > m_adaptiveBitrateMaximum - m_adaptiveBitrateUpRate)
+                        m_bitrate = m_adaptiveBitrateMaximum;
+                    else if (m_bitsSentInSecondPrev * 1e-6 >
+                            m_bitrate * m_adaptiveBitrateLightLoadThreshold *
+                                (m_framesPrevious == 0 ? m_refreshRate : m_framesPrevious) /
+                                m_refreshRate)
+                        m_bitrate += m_adaptiveBitrateUpRate;
+                }
             }
-        }
-        if (m_bitrateUpdated != m_bitrate) {
-            m_bitrateUpdated = m_bitrate;
-            return true;
-        } else {
-            return false;
+            if (m_bitrateUpdated != m_bitrate) {
+                m_bitrateUpdated = m_bitrate;
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 

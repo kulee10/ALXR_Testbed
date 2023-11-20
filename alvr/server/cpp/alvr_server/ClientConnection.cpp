@@ -216,16 +216,18 @@ void ClientConnection::ProcessTimeSync(TimeSync data) {
 			// 	(int)(m_Statistics->m_leftControllerBattery * 100),
 			// 	(int)(m_Statistics->m_rightControllerBattery * 100));
 
-			Info("[kyl_instantaneousBitrate]: %.3f", m_Statistics->GetBitsSentInSecond() / 1000. / 1000.0);
-			m_Statistics->updateThroughput(m_reportedStatistics.bitsSentInSecond / 1000. / 1000.0);
-			Info("[kyl_instantaneousThroughput]: %.3f", m_reportedStatistics.bitsSentInSecond / 1000. / 1000.0);
-			Info("[kyl_ewmaThroughput]: %f", m_Statistics->GetThroughput());
-			Info("[kyl_instantaneousTotalLatency]: %.3f", sendBuf.serverTotalLatency / 1000.0);
-			Info("[kyl_instantaneousTransportLatency]: %.3f", m_reportedStatistics.averageTransportLatency / 1000.0);
-			if (m_Statistics->GetPacketsSentInSecond() != 0 && m_Statistics->GetPacketsSentInSecond() > m_reportedStatistics.packetsLostInSecond) {
-				// Info("[kyl_PacketLossinSecond]: %d", m_reportedStatistics.packetsLostInSecond);
-				// Info("[kyl_PacketinSecond]: %d", m_Statistics->GetPacketsSentInSecond());
-				Info("[kyl_PacketLossRate]: %.2f", (static_cast<double>(m_reportedStatistics.packetsLostInSecond) / static_cast<double>(m_Statistics->GetPacketsSentInSecond())) * 100);
+			if (captureTriggerValue) {
+				Info("[kyl_instantaneousBitrate]: %.3f", m_Statistics->GetBitsSentInSecond() / 1000. / 1000.0);
+				m_Statistics->updateThroughput(m_reportedStatistics.bitsSentInSecond / 1000. / 1000.0);
+				Info("[kyl_instantaneousThroughput]: %.3f", m_reportedStatistics.bitsSentInSecond / 1000. / 1000.0);
+				Info("[kyl_ewmaThroughput]: %f", m_Statistics->GetThroughput());
+				Info("[kyl_instantaneousTotalLatency]: %.3f", sendBuf.serverTotalLatency / 1000.0);
+				Info("[kyl_instantaneousTransportLatency]: %.3f", m_reportedStatistics.averageTransportLatency / 1000.0);
+				if (m_Statistics->GetPacketsSentInSecond() != 0 && m_Statistics->GetPacketsSentInSecond() > m_reportedStatistics.packetsLostInSecond) {
+					// Info("[kyl_PacketLossinSecond]: %d", m_reportedStatistics.packetsLostInSecond);
+					// Info("[kyl_PacketinSecond]: %d", m_Statistics->GetPacketsSentInSecond());
+					Info("[kyl_PacketLossRate]: %.2f", (static_cast<double>(m_reportedStatistics.packetsLostInSecond) / static_cast<double>(m_Statistics->GetPacketsSentInSecond())) * 100);
+				}
 			}
 			// Info("[kyl_ewmaTotalLatency]: %d", m_Statistics->GetTotalLatencyAverage() / 1000.0);
 
