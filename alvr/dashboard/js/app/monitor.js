@@ -74,6 +74,10 @@ define([
                 captureTrigger();
                 // [YuanChun] end
 
+                //[kyl] begin
+                resetConfig();
+                //[kyl] end
+
                 updateClients();
             });
 
@@ -104,6 +108,31 @@ define([
             }
         }
         // [YuanChun] end
+
+        // [kyl] begin
+        function resetConfig() {
+            resetConfigBtn = document.getElementById("resetConfig");
+            if(resetConfigBtn) {
+                resetConfigBtn.addEventListener("click", function (e) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/api/user/resetConfig",
+                        contentType: "application/json;charset=UTF-8",
+                        data: JSON.stringify({
+                            resetConfig: null,
+                        }),
+                        processData: false,
+                        success: function (res) {
+                            console.log("[User] Reset success with ", res);
+                        },
+                        error: function (res) {
+                            console.log("[User] Reset failed with ", res);
+                        },
+                    });
+                });
+            }
+        }
+        // [kyl] end
 
         // [SM] begin
         function ffrReconfig() {

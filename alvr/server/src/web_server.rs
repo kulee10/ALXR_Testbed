@@ -265,6 +265,21 @@ async fn http_api(
         }
         // [YuanChun] end
 
+        // [kyl] begin
+        "/api/user/resetConfig" => {
+            if let Ok(data) = from_request_body::<json::Value>(request).await {
+                // let resetConfigValue = data.get("resetConfig").unwrap().as_bool().unwrap();
+                unsafe {crate::resetConfig();}
+                info!("[kyl] Reset Config");
+                reply(StatusCode::OK)?
+            }
+            else {
+                error!("[User] /api/user/resetConfig failed");
+                reply(StatusCode::BAD_REQUEST)?
+            }
+        }
+        // [kyl] end
+
         // [SM] begin
         "/api/user/ffrReconfig" => {
             if let Ok(data) = from_request_body::<json::Value>(request).await {

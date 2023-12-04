@@ -18,10 +18,15 @@ using namespace DirectX;
 #include "alvr_server/alvr_server.h"
 #include "alvr_server/bindings.h"
 bool captureTriggerValue = false;
+bool resetConfigValue = false;
+int resetCount = 0;
 void captureTrigger(
     bool _captureTriggerValue
 ){
 	captureTriggerValue = !captureTriggerValue;
+}
+void resetConfig() {
+	resetConfigValue = true;
 }
 // [kyl] end
 
@@ -86,21 +91,22 @@ void VideoEncoderNVENC::Initialize()
 	}
 
 	// [kyl] begin
-	if_read.open("D:/kyl/ALXR_Testbed/alvr/config/testcase.txt");
-	std::getline(if_read ,base_dir);
-	filepath = base_dir + "/encodeVideo.264";
-	// Info("encode264 target dir: %s\n", filepath);
-	if_read.close();
+	// if_read.open("D:/kyl/ALXR_Testbed/alvr/config/testcase.txt");
+	// std::getline(if_read ,base_dir);
+	// filepath = base_dir + "/encodeVideo.264";
+	// // Info("encode264 target dir: %s\n", filepath);
+	// if_read.close();
 
-	if(remove(filepath.c_str()) != 0)
-		Info("Error deleting H264 file");
-  	else
-		Info("H264 file successfully deleted");
-	// if(remove("encodeVideo.264") != 0)
+	// if(remove(filepath.c_str()) != 0)
 	// 	Info("Error deleting H264 file");
   	// else
 	// 	Info("H264 file successfully deleted");
-	// [kyl] end
+	// // if(remove("encodeVideo.264") != 0)
+	// // 	Info("Error deleting H264 file");
+  	// // else
+	// // 	Info("H264 file successfully deleted");
+	reset_log();
+	// // [kyl] end
 
 	Debug("CNvEncoder is successfully initialized.\n");
 }
@@ -128,6 +134,30 @@ void VideoEncoderNVENC::Shutdown()
 		fpOut.close();
 	}
 }
+
+// [kyl] begin
+void VideoEncoderNVENC::reset_log()
+{
+	std::string config_dir;
+	if_read.open("D:/kyl/ALXR_Testbed/alvr/config/testcase.txt");
+	std::getline(if_read ,config_dir);
+	filepath = config_dir + "/encodeVideo.264";
+	// Info("encode264 target dir: %s\n", filepath);
+	if_read.close();
+
+	if(remove(filepath.c_str()) != 0)
+		Info("Error deleting H264 file");
+  	else
+		Info("H264 file successfully deleted");
+	
+	qrcode_cnt = 0;
+	fs.open(filepath, std::fstream::out |  std::fstream::binary | std::fstream::app);
+	for (auto& frame : Iframe) {
+		fs.write(reinterpret_cast<char*>(frame.data()), frame.size());
+    }
+	fs.close();
+}
+// [kyl] end
 
 // [SM] begin
 void VideoEncoderNVENC::Transmit(ID3D11Texture2D *pTexture, uint64_t presentationTime, uint64_t targetTimestampNs, bool insertIDR, uint32_t encodeWidth, uint32_t encodeHeight, bool isUpdate)
@@ -253,6 +283,26 @@ void VideoEncoderNVENC::Transmit(ID3D11Texture2D *pTexture, uint64_t presentatio
 		m_Listener->GetStatistics()->EncodeOutput(GetTimestampUs() - presentationTime);
 	}
 
+	if (!resetConfigValue && resetCount == 0) {
+		resetFlag = false;
+	}
+	reset_lock.lock();
+	if (resetConfigValue && !resetFlag) {
+		fs.close();
+		reset_log();
+		if (resetCount == 3) {
+			resetCount = 0;
+			resetConfigValue = false;
+		} 
+		else {
+			resetCount += 1;
+			resetFlag = true;
+		}
+		Info("NVENC reset count %d", resetCount);
+		Info("NVENC reset flag %d", resetFlag);
+	}
+	reset_lock.unlock();
+
 	// [kyl] begin
 	// fs.open("encodeVideo.264", std::fstream::out |  std::fstream::binary | std::fstream::app);
 	fs.open(filepath, std::fstream::out |  std::fstream::binary | std::fstream::app);
@@ -262,7 +312,15 @@ void VideoEncoderNVENC::Transmit(ID3D11Texture2D *pTexture, uint64_t presentatio
 	{
 		if (!clientShutDown) {
 			if (fs) {
-				fs.write(reinterpret_cast<char*>(packet.data()), packet.size());
+				if (frame_count < 144) {
+					Iframe.push_back(packet);
+					// firstFrame = false;
+					frame_count += 1;
+					fs.write(reinterpret_cast<char*>(packet.data()), packet.size());
+				}
+				else {
+					fs.write(reinterpret_cast<char*>(packet.data()), packet.size());
+				}
 			}
 		}
 		if (fpOut) {

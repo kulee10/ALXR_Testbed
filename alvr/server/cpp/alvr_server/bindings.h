@@ -187,6 +187,7 @@ extern "C" void SetBattery(unsigned long long topLevelPath, float gauge_value, b
 
 // [kyl] begin
 extern "C" void ClientDisconnect();
+extern "C" void resetConfig();
 // [kyl] end
 
 // [YuanChun] begin

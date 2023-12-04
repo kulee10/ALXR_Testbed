@@ -260,10 +260,10 @@ vr::EVRInitError OvrHmd::Activate(vr::TrackedDeviceIndex_t unObjectId) {
     // [kyl] avoid addons block
     // Debug("breakpoint 6");
     // float originalIPD =
-    //     vr::VRSettings()->GetFloat(vr::k_pch_SteamVR_Section, vr::k_pch_SteamVR_IPD_Float);
+        // vr::VRSettings()->GetFloat(vr::k_pch_SteamVR_Section, vr::k_pch_SteamVR_IPD_Float);
     // Debug("breakpoint 7");
     // vr::VRSettings()->SetFloat(
-    //     vr::k_pch_SteamVR_Section, vr::k_pch_SteamVR_IPD_Float, Settings::Instance().m_flIPD);
+        // vr::k_pch_SteamVR_Section, vr::k_pch_SteamVR_IPD_Float, Settings::Instance().m_flIPD);
 #endif
 
     // Debug("breakpoint 8");

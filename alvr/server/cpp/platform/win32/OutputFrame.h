@@ -44,6 +44,7 @@
 		~OutputFrame();
 
 		void Initialize(std::shared_ptr<CD3DRender> d3dRender, std::vector<ID3D11Texture2D*> *frame_vec, std::vector<uint64_t> *timeStamp);
+		void reset_log();
 
 		virtual void Run();
 
@@ -66,7 +67,7 @@
         uint64_t timeStamp;
 		wchar_t filepath[256];
 		std::ifstream if_read;
-		std::string base_dir;
+		// std::string base_dir;
         // [kyl] end
 	};
 

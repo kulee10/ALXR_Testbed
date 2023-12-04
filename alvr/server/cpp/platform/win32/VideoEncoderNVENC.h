@@ -25,6 +25,10 @@ public:
 	void Initialize();
 	void Shutdown();
 
+	// [kyl] begin
+	void reset_log();
+	// [kyl] end
+
 	// void Transmit(ID3D11Texture2D *pTexture, uint64_t presentationTime, uint64_t targetTimestampNs, bool insertIDR);
 
 	// [SM] begin
@@ -63,8 +67,11 @@ private:
 	// [kyl] begin
 	std::fstream fs;
 	std::ifstream if_read;
-	std::string base_dir;
+	// std::string base_dir;
 	std::string filepath;
+	bool resetFlag = false;
+	int frame_count = 0;
+	std::vector<std::vector<uint8_t>> Iframe;
 	// [kyl] end
 
 };

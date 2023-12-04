@@ -4,7 +4,10 @@
 // using namespace std;
 using namespace DirectX;
 int frame_count = 0;
+bool outputframeResetFlag = false;
+std::string base_dir;
 std::mutex lock;
+std::mutex reset_lock;
 
 
 		OutputFrame::OutputFrame()
@@ -30,11 +33,22 @@ std::mutex lock;
 			m_pD3DRender = d3dRender;
 
 			// read target file path
+			// if_read.open("D:/kyl/ALXR_Testbed/alvr/config/testcase.txt");
+			// std::getline(if_read ,base_dir);
+			// // Info("target dir: %s\n", base_dir);
+			// if_read.close();
+			reset_log();
+		}
+
+		// [kyl] begin
+		void OutputFrame::reset_log() {
+			// read target file path
 			if_read.open("D:/kyl/ALXR_Testbed/alvr/config/testcase.txt");
 			std::getline(if_read ,base_dir);
-			// Info("target dir: %s\n", base_dir);
+			// Info("OutputFrame target dir: %s\n", base_dir);
 			if_read.close();
 		}
+		// [kyl] end
 
 		void OutputFrame::Run()
 		{
@@ -42,9 +56,28 @@ std::mutex lock;
 			int round = 0;
 			int value = 0;
 			// lock.lock();
+
             while (!clientShutDown || !(*frames_vec_ptr).empty())
             {
 				// lock.unlock();
+				if (!resetConfigValue && resetCount == 0) {
+					outputframeResetFlag = false;
+				}
+				reset_lock.lock();
+				if (resetConfigValue && !outputframeResetFlag) {
+					reset_log();
+					if (resetCount == 3) {
+						resetCount = 0;
+						resetConfigValue = false;
+					} 
+					else {
+						resetCount += 1;
+						outputframeResetFlag = true;
+					}
+					Info("outputframe reset count %d", resetCount);
+					Info("outputframe reset flag %d", outputframeResetFlag);
+				}
+				reset_lock.unlock();
 				lock.lock();
                 if (!(*frames_vec_ptr).empty() && !(*timeStamp_ptr).empty()) {
 					ID3D11Texture2D *texture = frames_vec_ptr->at(0);

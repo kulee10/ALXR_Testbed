@@ -1,6 +1,7 @@
 #include "ClientConnection.h"
 #include <mutex>
 #include <string.h>
+#include <iomanip>
 
 #include "Statistics.h"
 #include "Logger.h"
@@ -21,7 +22,29 @@ ClientConnection::ClientConnection() : m_LastStatisticsUpdate(0) {
 	m_fecPercentage = INITIAL_FEC_PERCENTAGE;
 	memset(&m_reportedStatistics, 0, sizeof(m_reportedStatistics));
 	m_Statistics->ResetAll();
+
+	// [kyl begin]
+	reset_log();
+	// [kyl end]
 }
+
+// [kyl begin]
+void ClientConnection::reset_log() {
+	std::string config_dir;
+	if_read.open("D:/kyl/ALXR_Testbed/alvr/config/testcase.txt");
+	std::getline(if_read ,config_dir);
+	filepath = config_dir + "/log.txt";
+	// Info("ClientConnection target dir: %s\n", filepath);
+	if_read.close();
+
+	if(remove(filepath.c_str()) != 0)
+		Info("Error deleting log file");
+  	else
+		Info("log file successfully deleted");
+
+	fs.open(filepath, std::fstream::out | std::fstream::app);
+}
+// [kyl end]
 
 void ClientConnection::FECSend(uint8_t *buf, int len, uint64_t targetTimestampNs, uint64_t videoFrameIndex) {
 	int shardPackets = CalculateFECShardPackets(len, m_fecPercentage);
@@ -215,18 +238,42 @@ void ClientConnection::ProcessTimeSync(TimeSync data) {
 			// 	(int)(m_Statistics->m_hmdBattery * 100),
 			// 	(int)(m_Statistics->m_leftControllerBattery * 100),
 			// 	(int)(m_Statistics->m_rightControllerBattery * 100));
-
+			if (!resetConfigValue && resetCount == 0) {
+				resetFlag = false;
+			}
+			reset_lock.lock();
+			if (resetConfigValue && !resetFlag) {
+				fs.close();
+				reset_log();
+				if (resetCount == 3) {
+					resetCount = 0;
+					resetConfigValue = false;
+				} 
+				else {
+					resetCount += 1;
+					resetFlag = true;
+				}
+				Info("ClientConnection reset count %d", resetCount);
+				Info("ClientConnection reset flag %d", resetFlag);
+			}
+			reset_lock.unlock();
+			m_Statistics->updateThroughput(m_reportedStatistics.bitsSentInSecond / 1000. / 1000.0);
 			if (captureTriggerValue) {
-				Info("[kyl_instantaneousBitrate]: %.3f", m_Statistics->GetBitsSentInSecond() / 1000. / 1000.0);
-				m_Statistics->updateThroughput(m_reportedStatistics.bitsSentInSecond / 1000. / 1000.0);
-				Info("[kyl_instantaneousThroughput]: %.3f", m_reportedStatistics.bitsSentInSecond / 1000. / 1000.0);
-				Info("[kyl_ewmaThroughput]: %f", m_Statistics->GetThroughput());
-				Info("[kyl_instantaneousTotalLatency]: %.3f", sendBuf.serverTotalLatency / 1000.0);
-				Info("[kyl_instantaneousTransportLatency]: %.3f", m_reportedStatistics.averageTransportLatency / 1000.0);
+				fs << "[kyl_instantaneousBitrate]: " << std::fixed << std::setprecision(3) << m_Statistics->GetBitsSentInSecond() / 1000. / 1000.0 << std::endl;
+				fs << "[kyl_instantaneousThroughput]: " << std::fixed << std::setprecision(3) << m_reportedStatistics.bitsSentInSecond / 1000. / 1000.0 << std::endl;
+				fs << "[kyl_ewmaThroughput]: " << std::fixed << std::setprecision(3) << m_Statistics->GetThroughput() << std::endl;
+				fs << "[kyl_instantaneousTotalLatency]: " << std::fixed << std::setprecision(3) << sendBuf.serverTotalLatency / 1000.0 << std::endl;
+				fs << "[kyl_instantaneousTransportLatency]: " << std::fixed << std::setprecision(3) << m_reportedStatistics.averageTransportLatency / 1000.0 << std::endl;
+				// Info("[kyl_instantaneousBitrate]: %.3f", m_Statistics->GetBitsSentInSecond() / 1000. / 1000.0);
+				// Info("[kyl_instantaneousThroughput]: %.3f", m_reportedStatistics.bitsSentInSecond / 1000. / 1000.0);
+				// Info("[kyl_ewmaThroughput]: %f", m_Statistics->GetThroughput());
+				// Info("[kyl_instantaneousTotalLatency]: %.3f", sendBuf.serverTotalLatency / 1000.0);
+				// Info("[kyl_instantaneousTransportLatency]: %.3f", m_reportedStatistics.averageTransportLatency / 1000.0);
 				if (m_Statistics->GetPacketsSentInSecond() != 0 && m_Statistics->GetPacketsSentInSecond() > m_reportedStatistics.packetsLostInSecond) {
 					// Info("[kyl_PacketLossinSecond]: %d", m_reportedStatistics.packetsLostInSecond);
 					// Info("[kyl_PacketinSecond]: %d", m_Statistics->GetPacketsSentInSecond());
-					Info("[kyl_PacketLossRate]: %.2f", (static_cast<double>(m_reportedStatistics.packetsLostInSecond) / static_cast<double>(m_Statistics->GetPacketsSentInSecond())) * 100);
+					// Info("[kyl_PacketLossRate]: %.2f", (static_cast<double>(m_reportedStatistics.packetsLostInSecond) / static_cast<double>(m_Statistics->GetPacketsSentInSecond())) * 100);
+					fs << "[kyl_PacketLossRate]: " << std::fixed << std::setprecision(2) << (static_cast<double>(m_reportedStatistics.packetsLostInSecond) / static_cast<double>(m_Statistics->GetPacketsSentInSecond())) * 100 << std::endl;
 				}
 			}
 			// Info("[kyl_ewmaTotalLatency]: %d", m_Statistics->GetTotalLatencyAverage() / 1000.0);

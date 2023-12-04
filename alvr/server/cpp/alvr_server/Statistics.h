@@ -15,6 +15,7 @@
 #include <sstream>
 #include <vector>
 #include "alvr_server.h"
+#include "platform/win32/mutex.h"
 // [kyl] end
 
 class Statistics {
@@ -36,6 +37,7 @@ class Statistics {
         std::fstream file("D:/kyl/ALXR_Testbed/alvr/config/config.csv", std::ios::in);
         bool first = true;
         if (file.is_open()) {
+            std::string line, word;
             while (getline(file, line)) {
                 if (!first) {
                     row.clear();
@@ -49,6 +51,8 @@ class Statistics {
                     table_ID = row[4];
                     algo_ID = row[5];
 
+                    Info("algo ID: %.1f", algo_ID);
+
                     // choose table
                     ////////////////////////
                     // 0: general model   //
@@ -56,27 +60,31 @@ class Statistics {
                     // 2: beatsaber model //
                     // 3: artpuzzle model //
                     ////////////////////////
-                    if (table_ID == 0) {
-                        table = table_general;
-                        row_num = 14670;
-                        Info("Table: general");
-                        Info("entries: %d", table.size());
-                    } else if (table_ID == 1) {
-                        table = table_angryBird;
-                        row_num = 4890;
-                        Info("Table: angryBird");
-                        Info("entries: %d", table.size());
-                    } else if (table_ID == 2) {
-                        table = table_beatSaber;
-                        row_num = 4890;
-                        Info("Table: beatSaber");
-                        Info("entries: %d", table.size());
-                    } else if (table_ID == 3) {
-                        table = table_artPuzzle;
-                        row_num = 4890;
-                        Info("Table: artPuzzle");
-                        Info("entries: %d", table.size());
-                    }
+                    table = table_general;
+                    row_num = 14670;
+                    Info("Table: general");
+                    Info("entries: %d", table.size());
+                    // if (table_ID == 0) {
+                    //     table = table_general;
+                    //     row_num = 14670;
+                    //     Info("Table: general");
+                    //     Info("entries: %d", table.size());
+                    // } else if (table_ID == 1) {
+                    //     table = table_angryBird;
+                    //     row_num = 4890;
+                    //     Info("Table: angryBird");
+                    //     Info("entries: %d", table.size());
+                    // } else if (table_ID == 2) {
+                    //     table = table_beatSaber;
+                    //     row_num = 4890;
+                    //     Info("Table: beatSaber");
+                    //     Info("entries: %d", table.size());
+                    // } else if (table_ID == 3) {
+                    //     table = table_artPuzzle;
+                    //     row_num = 4890;
+                    //     Info("Table: artPuzzle");
+                    //     Info("entries: %d", table.size());
+                    // }
                 } else {
                     first = false;
                 }
@@ -90,6 +98,7 @@ class Statistics {
         std::fstream file("D:/kyl/QoE_Modeling/lookupTable_interpolate.csv", std::ios::in);
         bool first = true;
         if (file.is_open()) {
+            std::string line, word;
             while (getline(file, line)) {
                 if (!first) {
                     row.clear();
@@ -105,61 +114,61 @@ class Statistics {
         }
 
         // angryBird table
-        std::fstream file_a("D:/kyl/QoE_Modeling/lookupTable_angryBird_interpolate.csv",
-                            std::ios::in);
-        first = true;
-        if (file_a.is_open()) {
-            while (getline(file_a, line)) {
-                if (!first) {
-                    row.clear();
-                    std::stringstream str(line);
-                    while (getline(str, word, ','))
-                        row.push_back(std::stof(word));
-                    table_angryBird.push_back(row);
-                } else {
-                    first = false;
-                }
-            }
-            file_a.close();
-        }
+        // std::fstream file_a("D:/kyl/QoE_Modeling/lookupTable_angryBird_interpolate.csv",
+        //                     std::ios::in);
+        // first = true;
+        // if (file_a.is_open()) {
+        //     while (getline(file_a, line)) {
+        //         if (!first) {
+        //             row.clear();
+        //             std::stringstream str(line);
+        //             while (getline(str, word, ','))
+        //                 row.push_back(std::stof(word));
+        //             table_angryBird.push_back(row);
+        //         } else {
+        //             first = false;
+        //         }
+        //     }
+        //     file_a.close();
+        // }
 
-        // beatSaber table
-        std::fstream file_b("D:/kyl/QoE_Modeling/lookupTable_beatSaber_interpolate.csv",
-                            std::ios::in);
-        first = true;
-        if (file_b.is_open()) {
-            while (getline(file_b, line)) {
-                if (!first) {
-                    row.clear();
-                    std::stringstream str(line);
-                    while (getline(str, word, ','))
-                        row.push_back(std::stof(word));
-                    table_beatSaber.push_back(row);
-                } else {
-                    first = false;
-                }
-            }
-            file_b.close();
-        }
+        // // beatSaber table
+        // std::fstream file_b("D:/kyl/QoE_Modeling/lookupTable_beatSaber_interpolate.csv",
+        //                     std::ios::in);
+        // first = true;
+        // if (file_b.is_open()) {
+        //     while (getline(file_b, line)) {
+        //         if (!first) {
+        //             row.clear();
+        //             std::stringstream str(line);
+        //             while (getline(str, word, ','))
+        //                 row.push_back(std::stof(word));
+        //             table_beatSaber.push_back(row);
+        //         } else {
+        //             first = false;
+        //         }
+        //     }
+        //     file_b.close();
+        // }
 
-        // artPuzzle table
-        std::fstream file_p("D:/kyl/QoE_Modeling/lookupTable_artPuzzle_interpolate.csv",
-                            std::ios::in);
-        first = true;
-        if (file_p.is_open()) {
-            while (getline(file_p, line)) {
-                if (!first) {
-                    row.clear();
-                    std::stringstream str(line);
-                    while (getline(str, word, ','))
-                        row.push_back(std::stof(word));
-                    table_artPuzzle.push_back(row);
-                } else {
-                    first = false;
-                }
-            }
-            file_p.close();
-        }
+        // // artPuzzle table
+        // std::fstream file_p("D:/kyl/QoE_Modeling/lookupTable_artPuzzle_interpolate.csv",
+        //                     std::ios::in);
+        // first = true;
+        // if (file_p.is_open()) {
+        //     while (getline(file_p, line)) {
+        //         if (!first) {
+        //             row.clear();
+        //             std::stringstream str(line);
+        //             while (getline(str, word, ','))
+        //                 row.push_back(std::stof(word));
+        //             table_artPuzzle.push_back(row);
+        //         } else {
+        //             first = false;
+        //         }
+        //     }
+        //     file_p.close();
+        // }
     }
     // [kyl] end
 
@@ -284,8 +293,32 @@ class Statistics {
             interval = 0;
         }
 
+        if (!resetConfigValue && resetCount == 0) {
+            resetFlag = false;
+        }
+        reset_lock.lock();
+        if (resetConfigValue && !resetFlag) {
+            readConfig();
+            m_bitrate = 32;
+            m_refreshRate = 72;
+            m_renderWidth = 2880;
+            m_renderHeight = 1568;
+            updateFlag = true;
+            if (resetCount == 3) {
+                resetCount = 0;
+                resetConfigValue = false;
+            } 
+            else {
+                resetCount += 1;
+                resetFlag = true;
+            }
+            Info("statistics reset count %d", resetCount);
+            Info("statistics reset flag %d", resetFlag);
+        }
+        reset_lock.unlock();
+
         // reconfiguration periodically (3s)
-        if (interval >= 1 && algo_ID == 2 && captureTriggerValue) {
+        if (interval >= 3 && algo_ID == 2 && captureTriggerValue) {
             Info("start adaptation");
             // match latency
             for (int i = 0; i < 5; i++) {
@@ -537,14 +570,15 @@ class Statistics {
 
     std::vector<std::vector<float>> table;
     std::vector<std::vector<float>> table_general;
-    std::vector<std::vector<float>> table_angryBird;
-    std::vector<std::vector<float>> table_beatSaber;
-    std::vector<std::vector<float>> table_artPuzzle;
+    // std::vector<std::vector<float>> table_angryBird;
+    // std::vector<std::vector<float>> table_beatSaber;
+    // std::vector<std::vector<float>> table_artPuzzle;
     float table_ID = 0;
     int row_num = 14670;
     std::vector<float> row;
-    std::string line, word;
+    // std::string line, word;
     float algo_ID = 0;
+    bool resetFlag = false;
 
     // quality modeling inputs
     float vr_exp = 0;

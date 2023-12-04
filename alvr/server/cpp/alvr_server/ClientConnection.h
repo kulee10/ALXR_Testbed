@@ -10,6 +10,10 @@
 
 #include "openvr_driver.h"
 
+// [kyl] begin
+#include "platform/win32/mutex.h"
+// [kyl] end
+
 class Statistics;
 
 class ClientConnection {
@@ -22,6 +26,11 @@ public:
  	void ProcessTimeSync(TimeSync data);
 	float GetPoseTimeOffset();
 	void OnFecFailure();
+
+	// [kyl] begin
+	void reset_log();
+	// [kyl] end
+
 	std::shared_ptr<Statistics> GetStatistics();
 
 	std::shared_ptr<Statistics> m_Statistics;
@@ -43,4 +52,12 @@ public:
 	uint64_t mVideoFrameIndex = 1;
 
 	uint64_t m_LastStatisticsUpdate;
+
+	// [kyl] begin
+	std::fstream fs;
+	std::ifstream if_read;
+	// std::string base_dir;
+	std::string filepath;
+	bool resetFlag = false;
+	// [kyl] end
 };
