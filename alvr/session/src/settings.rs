@@ -578,7 +578,7 @@ pub fn session_settings_default() -> SettingsDefault {
                     bitrate_maximum: 32,
                     latency_target: 12000,
                     latency_use_frametime: SwitchDefault {
-                        enabled: false,
+                        enabled: true,
                         content: LatencyUseFrametimeDescDefault {
                             latency_target_maximum: 30000,
                             latency_target_offset: 0,

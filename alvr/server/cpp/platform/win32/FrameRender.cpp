@@ -372,43 +372,6 @@ bool FrameRender::RenderFrame(ID3D11Texture2D *pTexture[][2], vr::VRTextureBound
 			continue;
 		}
 
-		// [jw] begin
-		// Info("[jw] captureTriggerValue: %d\n", captureTriggerValue);
-		// if (!clientShutDown && captureTriggerValue) {
-		// 	Info("[jw] FrameRender pasting QRcode");
-		// 	D3D11_BOX box;
-		// 	box.left = 0, box.right = 128;
-		// 	box.top = 0,  box.bottom = 128;
-		// 	box.front = 0, box.back = 1;
-		// 	m_pD3DRender->GetContext()->CopySubresourceRegion(
-		// 		textures[0], 0,
-		// 		viewport.Width/10, viewport.Height/10, 0,
-		// 		qrcodeTex_ptr[qrcode_cnt%1000], 0, &box
-		// 	);
-
-			// ID3D11Texture2D *bufferTexture;
-			// ScratchImage img;
-			// HRESULT hr = CaptureTexture(m_pD3DRender->GetDevice(), m_pD3DRender->GetContext(), textures[0], img);
-			// if (FAILED(hr)) {
-			// 	Info("[kyl] copy texture fail");	
-			// }
-			// else {
-			// 	hr = CreateTexture(m_pD3DRender->GetDevice(), img.GetImages(), img.GetImageCount(), img.GetMetadata(), (ID3D11Resource**)(&bufferTexture));
-			// 	if (FAILED(hr)) {
-			// 		Info("[kyl] create buffer texture fail");	
-			// 	}
-			// 	else {
-			// 		lock.lock();
-			// 		(*frames_vec_ptr).push_back(bufferTexture); // save frames for capture
-			// 		(*timeStamp_ptr).push_back(qrcode_cnt); // save qrcode index
-			// 		qrcode_cnt += 1;
-			// 		lock.unlock();
-			// 		// Info("[kyl] create buffer texture successfully!!!");
-			// 	}
-			// }
-		// }
-		// [jw] end
-
 		D3D11_TEXTURE2D_DESC srcDesc;
 		textures[0]->GetDesc(&srcDesc);
 
@@ -530,6 +493,7 @@ ComPtr<ID3D11Texture2D> FrameRender::GetTexture()
 void FrameRender::GetEncodingResolution(uint32_t *width, uint32_t *height) {
 	if (enableFFR) {
 		m_ffr->GetOptimizedResolution(width, height);
+		Info("[kyl] Encoding resolution: %u %u", *width, *height);
 	}
 	else {
 		*width = Settings::Instance().m_renderWidth;

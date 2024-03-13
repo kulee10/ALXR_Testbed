@@ -27,7 +27,7 @@ bincode = "1"
 # Async and networking
 bytes = "1"
 futures = "0.3"
-tokio = { version = "1", features = ["rt-multi-thread", "macros", "time"] }
+tokio = { version = "1.28.2", features = ["rt-multi-thread", "macros", "time"] }
 # Miscellaneous
 cpal = "0.13.5"
 

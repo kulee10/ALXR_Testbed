@@ -233,6 +233,7 @@ void VideoEncoderNVENC::Transmit(ID3D11Texture2D *pTexture, uint64_t presentatio
 
 	// [kyl] begin
 	if (!clientShutDown && captureTriggerValue) {
+		// enable qrcode
 		box.left = 0, box.right = 128;
 		box.top = 0,  box.bottom = 128;
 		box.front = 0, box.back = 1;

@@ -52,39 +52,9 @@ class Statistics {
                     algo_ID = row[5];
 
                     Info("algo ID: %.1f", algo_ID);
-
-                    // choose table
-                    ////////////////////////
-                    // 0: general model   //
-                    // 1: angrybird model //
-                    // 2: beatsaber model //
-                    // 3: artpuzzle model //
-                    ////////////////////////
                     table = table_general;
-                    row_num = 14670;
-                    Info("Table: general");
+                    row_num = 13824;
                     Info("entries: %d", table.size());
-                    // if (table_ID == 0) {
-                    //     table = table_general;
-                    //     row_num = 14670;
-                    //     Info("Table: general");
-                    //     Info("entries: %d", table.size());
-                    // } else if (table_ID == 1) {
-                    //     table = table_angryBird;
-                    //     row_num = 4890;
-                    //     Info("Table: angryBird");
-                    //     Info("entries: %d", table.size());
-                    // } else if (table_ID == 2) {
-                    //     table = table_beatSaber;
-                    //     row_num = 4890;
-                    //     Info("Table: beatSaber");
-                    //     Info("entries: %d", table.size());
-                    // } else if (table_ID == 3) {
-                    //     table = table_artPuzzle;
-                    //     row_num = 4890;
-                    //     Info("Table: artPuzzle");
-                    //     Info("entries: %d", table.size());
-                    // }
                 } else {
                     first = false;
                 }
@@ -281,7 +251,6 @@ class Statistics {
 
     void updateThroughput(float throughput) {
         m_throughput = alpha * throughput + (1 - alpha) * m_throughput;
-        // m_throughput = throughput;
     }
 
     bool CheckUpdate() {
@@ -321,7 +290,7 @@ class Statistics {
         if (interval >= 3 && algo_ID == 2 && captureTriggerValue) {
             Info("start adaptation");
             // match latency
-            for (int i = 0; i < 5; i++) {
+            for (int i = 0; i < 4; i++) {
                 latency_diff = (m_totalLatency / 1000) - latency[i];
                 latency_diff = abs(latency_diff);
                 // Info("latency_diff: %d", latency_diff);
@@ -332,7 +301,7 @@ class Statistics {
             }
 
             // match throughput
-            for (int i = 0; i < 7; i++) {
+            for (int i = 0; i < 6; i++) {
                 throughput_diff = m_throughput - throughput[i];
                 throughput_diff = abs(throughput_diff);
                 // Info("throughput_diff: %d", throughput_diff);
@@ -349,8 +318,7 @@ class Statistics {
                         table[i][5] == throughput[min_throughput_diff_idx] &&
                         table[i][7] == vr_exp && table[i][8] == gaming_freq && table[i][9] == SI &&
                         table[i][10] == TI) {
-                        // float mos_diff = abs(table[i][11] - current_mos);
-                        if (table[i][11] > current_mos) {
+                        if (table[i][11] >= current_mos) {
                             current_mos = table[i][11];
                             target_idx = i;
                         }
@@ -359,8 +327,7 @@ class Statistics {
                     if (table[i][4] == latency[min_latency_diff_idx] &&
                         table[i][5] == throughput[min_throughput_diff_idx] &&
                         table[i][7] == vr_exp && table[i][8] == gaming_freq) {
-                        // float mos_diff = abs(table[i][11] - current_mos);
-                        if (table[i][9] > current_mos) {
+                        if (table[i][9] >= current_mos) {
                             current_mos = table[i][9];
                             target_idx = i;
                         }
@@ -368,22 +335,20 @@ class Statistics {
                 }
             }
 
-            Info("throughput: %d", throughput[min_throughput_diff_idx]);
-            Info("latency: %d", latency[min_latency_diff_idx]);
-            Info("target idx: %d", target_idx);
-            Info("current_mos: %f", current_mos);
+            // Info("throughput: %d", throughput[min_throughput_diff_idx]);
+            // Info("latency: %d", latency[min_latency_diff_idx]);
+            // Info("target idx: %d", target_idx);
+            // Info("current_mos: %f", current_mos);
 
-            // increase the bitrate if the parameter didn't update
-            /*if (target_idx == prev_idx && m_sendLatency < m_adaptiveBitrateTarget - m_adaptiveBitrateThreshold) {*/
             if (target_idx == prev_idx) {
-                Info("Increase bitrate!");
-                m_bitrate = int(m_throughput) + 1;
-                // if (m_bitrate <= 31) {
-                //     m_bitrate += 1;
-                // }
+                // m_bitrate = int(m_throughput) + 1;
+                if (m_bitsSentInSecondPrev * 1e-6 > m_bitrate * m_adaptiveBitrateLightLoadThreshold * (m_framesPrevious == 0 ? m_refreshRate : m_framesPrevious) / m_refreshRate) {
+                    m_bitrate += 1;
+                }
 
                 // bitrate debug
                 if (m_bitrate > 32) {
+                    m_bitrate = 32;
                     Info("Exceed bitrate bound!");
                 }
             } else {
@@ -570,11 +535,8 @@ class Statistics {
 
     std::vector<std::vector<float>> table;
     std::vector<std::vector<float>> table_general;
-    // std::vector<std::vector<float>> table_angryBird;
-    // std::vector<std::vector<float>> table_beatSaber;
-    // std::vector<std::vector<float>> table_artPuzzle;
     float table_ID = 0;
-    int row_num = 14670;
+    int row_num = 13824;
     std::vector<float> row;
     // std::string line, word;
     float algo_ID = 0;
@@ -585,9 +547,9 @@ class Statistics {
     float gaming_freq = 1;
     float SI = 35.72;
     float TI = 24.41;
-    int latency[5] = {77, 149, 219, 384, 583};
-    int throughput[7] = {4, 6, 18, 21, 26, 30, 36};
-    int packetloss[1] = {0};
+    int latency[4] = {57, 96, 154, 198};
+    int throughput[6] = {4, 6, 15, 20, 22, 28};
+    int packetloss[3] = {0, 2, 5};
     int latency_diff = 0;
     int min_latency_diff = 10000;
     int min_latency_diff_idx = 0;
@@ -599,7 +561,7 @@ class Statistics {
     int prev_idx = 0;
     bool updateFlag = false;
     bool resUpdate = false;
-    float alpha = 0.5;
+    float alpha = 0.3;
     // [kyl] end
 
     // Total/Encode/Send/Decode/ClientFPS/Ping
